@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, shrink-to-fit=no">
+  <title>4040</title>
+  
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;700;800&display=swap" rel="stylesheet">
+  
+  <style>
+    :root {
+      --latar-kertas: #f4f4f5; 
+      --teks-tinta: #18181b; 
+      --abu-abu: #a1a1aa; 
+      --garis-buku: rgba(0, 0, 0, 0.12);
+    }
+
+    * { 
+      margin: 0; 
+      padding: 0; 
+      box-sizing: border-box; 
+      -webkit-tap-highlight-color: transparent;
+      -webkit-touch-callout: none;
+      -webkit-user-select: none;
+      user-select: none;
+    }
+
+    html, body {
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+      background: var(--latar-kertas);
+      touch-action: none; 
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      color: var(--teks-tinta);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      perspective: 1000px; 
+    }
+
+    .tekstur-kertas {
+      position: fixed;
+      inset: 0;
+      z-index: 1;
+      opacity: 0.4;
+      pointer-events: none;
+      background: url('data:image/svg+xml;utf8,%3Csvg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"%3E%3Cfilter id="noise"%3E%3CfeTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="3" stitchTiles="stitch"/%3E%3C/filter%3E%3Crect width="100%25" height="100%25" filter="url(%23noise)"/%3E%3C/svg%3E');
+      mix-blend-mode: multiply;
+    }
+
+    @media (pointer: fine) {
+      body { cursor: none; }
+      .kursor-sorot {
+        position: fixed;
+        width: 3.5vmin; height: 3.5vmin;
+        background: rgba(0, 0, 0, 0.1);
+        border: 1.5px solid var(--teks-tinta);
+        border-radius: 50%;
+        pointer-events: none;
+        z-index: 9999;
+        transform: translate(-50%, -50%);
+        transition: width 0.2s, height 0.2s;
+        display: block;
+      }
+    }
+    @media (pointer: coarse) { .kursor-sorot { display: none; } }
+
+    .layar {
+      position: absolute; 
+      top: 0; left: 0; width: 100vw; height: 100vh;
+      display: flex; 
+      flex-direction: column; 
+      justify-content: center; 
+      align-items: center;
+      opacity: 0; 
+      visibility: hidden;
+      transform: scale(0.95) translateY(3vmin);
+      transition: all 0.5s cubic-bezier(0.2, 1, 0.3, 1);
+      z-index: 10;
+    }
+
+    .layar.aktif {
+      opacity: 1; 
+      visibility: visible;
+      transform: scale(1) translateY(0);
+    }
+
+    .bungkus-kartu {
+      position: relative; 
+      width: 88vmin; 
+      transition: transform 0.4s ease-out;
+    }
+
+    .kartu-pesan {
+      position: relative; 
+      background: #ffffff; 
+      border: 2px solid var(--teks-tinta); 
+      border-radius: 3vmin; 
+      padding: 7vmin 6vmin;
+      box-shadow: 1.5vmin 1.5vmin 0 var(--teks-tinta); 
+      width: 100%;
+      display: flex; 
+      flex-direction: column; 
+      align-items: flex-start; 
+      justify-content: center;
+      contain: paint layout; 
+    }
+
+    .wadah-emoji {
+      width: 14vmin;
+      height: 14vmin;
+      background: #ffffff;
+      border: 2px solid var(--teks-tinta);
+      border-radius: 50%; 
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 7vmin;
+      margin-bottom: 4vmin;
+      box-shadow: 0.8vmin 0.8vmin 0 var(--teks-tinta);
+      transform: translateZ(0);
+    }
+
+    h2 { 
+      font-weight: 800; 
+      font-size: 5.5vmin; 
+      color: var(--teks-tinta); 
+      margin-bottom: 2.5vmin;
+      line-height: 1.2;
+      transform: translateZ(0);
+    }
+    
+    .pesan-teks {
+      width: 100%;
+      color: var(--teks-tinta); 
+      font-size: 3.8vmin; 
+      line-height: 6.5vmin; 
+      font-weight: 500;
+      min-height: 13vmin;     
+      max-height: 55vh; 
+      overflow-y: auto;       
+      margin-bottom: 4vmin; 
+      text-align: left;
+      padding-left: 4vmin;
+      border-left: 3px solid var(--teks-tinta); 
+      
+      background-image: repeating-linear-gradient(
+        transparent, 
+        transparent calc(6.5vmin - 2px), 
+        var(--garis-buku) calc(6.5vmin - 2px), 
+        var(--garis-buku) 6.5vmin
+      );
+      background-position: 0 0.8vmin; 
+      background-attachment: local; 
+      
+      scrollbar-width: thin; 
+      scrollbar-color: var(--abu-abu) transparent;
+      touch-action: pan-y; 
+      contain: content;
+      transform: translateZ(0);
+    }
+
+    .pesan-teks::-webkit-scrollbar { width: 0.6vmin; }
+    .pesan-teks::-webkit-scrollbar-track { background: transparent; }
+    .pesan-teks::-webkit-scrollbar-thumb {
+      background: var(--abu-abu);
+      border-radius: 1vmin;
+    }
+
+    .kursor-ketik {
+      display: inline-block; 
+      width: 0.8vmin; 
+      height: 4vmin;
+      background-color: var(--teks-tinta); 
+      vertical-align: middle;
+      animation: kedip 0.8s infinite; 
+      margin-left: 0.5vmin;
+    }
+    @keyframes kedip { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+    
+    .wadah-tombol {
+      width: 100%;
+      display: flex;
+      justify-content: center;
+    }
+
+    .tombol-ketik {
+      display: inline-block;
+      background: var(--teks-tinta); 
+      color: var(--latar-kertas);
+      border: 2px solid var(--teks-tinta);
+      padding: 2.5vmin 6vmin; 
+      border-radius: 2vmin;
+      font-size: 3.5vmin; 
+      font-weight: 700;
+      font-family: inherit;
+      pointer-events: none; 
+      opacity: 0;
+      transition: all 0.2s ease; 
+      transform: translateY(2vmin); 
+      box-shadow: 0.6vmin 0.6vmin 0 rgba(0,0,0,0.3);
+    }
+
+    .tombol-ketik.siap {
+      pointer-events: auto; 
+      opacity: 1;
+      transform: translateY(0);
+      cursor: pointer;
+    }
+    
+    .tombol-ketik.siap:active { 
+      transform: translate(0.6vmin, 0.6vmin); 
+      box-shadow: 0 0 0 rgba(0,0,0,0);
+    }
+  </style>
+</head>
+<body>
+
+  <div class="kursor-sorot" id="kursor-mouse"></div>
+  <div class="tekstur-kertas"></div>
+  
+  <audio id="musik-latar" src="https://feeldreampic.github.io/audio/nightchanges.mp3" loop></audio>
+
+  <!-- HALAMAN 1 -->
+  <div id="layar1" class="layar aktif">
+    <div class="bungkus-kartu">
+      <div class="kartu-pesan">
+        <div class="wadah-emoji">👀</div>
+        <h2 id="judul1"></h2>
+        <div class="pesan-teks" id="pesan1"></div>
+        <div class="wadah-tombol">
+          <button class="tombol-ketik" id="tombol1" onclick="gantiLayar(2)"></button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- HALAMAN 2 -->
+  <div id="layar2" class="layar">
+    <div class="bungkus-kartu">
+      <div class="kartu-pesan">
+        <div class="wadah-emoji">🧸</div>
+        <h2 id="judul2"></h2>
+        <div class="pesan-teks" id="pesan2"></div>
+        <div class="wadah-tombol">
+          <button class="tombol-ketik" id="tombol2" onclick="gantiLayar(3)"></button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- HALAMAN 3 -->
+  <div id="layar3" class="layar">
+    <div class="bungkus-kartu">
+      <div class="kartu-pesan">
+        <div class="wadah-emoji">🥺</div>
+        <h2 id="judul3"></h2>
+        <div class="pesan-teks" id="pesan3"></div>
+        <div class="wadah-tombol">
+          <button class="tombol-ketik" id="tombol3" onclick="gantiLayar(4)"></button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- HALAMAN 4 -->
+  <div id="layar4" class="layar">
+    <div class="bungkus-kartu">
+      <div class="kartu-pesan">
+        <div class="wadah-emoji">🎤</div>
+        <h2 id="judul4"></h2>
+        <div class="pesan-teks" id="pesan4"></div>
+        <div class="wadah-tombol">
+          <button class="tombol-ketik" id="tombol4" onclick="gantiLayar(5)"></button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- HALAMAN 5 -->
+  <div id="layar5" class="layar">
+    <div class="bungkus-kartu">
+      <div class="kartu-pesan">
+        <div class="wadah-emoji">🍜</div>
+        <h2 id="judul5"></h2>
+        <div class="pesan-teks" id="pesan5"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let prosesTransisi = false; 
+
+    const skripCerita = {
+      1: {
+        judul: "Spill sikit bestie...",
+        pesan: "Sebelum lu lanjut scrolling, pliss mental dicheck dulu ya, bestie. Jangan overthinking, soalnya apa yang bakal lu baca ini vibes-nya agak laen dan bikin salting brutal.",
+        tombol: "Aman, gas!"
+      },
+      2: {
+        judul: "Real Talk Nih!",
+        pesan: "Lu sadar gak sih akhir-akhir ini kelakuan lu tuh toxic banget ke mental gue? Tiap detik bikin salah tingkah mulu. Tanggung jawab ya lu!",
+        tombol: "Emang iya? 🫣"
+      },
+      3: {
+        judul: "Sumpah Demi Apa...",
+        pesan: "Gue tuh aslinya kaum males bales chat, tapi khusus buat lo, handphone gue langsung berasa fast-response 24/7. Candu banget parah, fix no debat!",
+        tombol: "Dih, alay"
+      },
+      4: {
+        judul: "Klarifikasi Dulu Nih",
+        pesan: "Daripada kita sok sibuk tapi jomok (jomblo melarat kesepian) mulu, mending langsung to the point aja deh. Mau gak lu jadi ayank-an gue?",
+        tombol: "Mau gak ya..."
+      },
+      5: {
+        judul: "Deal Ya, No Counter!",
+        pesan: "Nah kan, gak usah banyak caper, emang aslinya lu naksir kan? Mulai sekarang resmi ya kita jadian, awas aja kalau ghosting!"
+      }
+    };
+
+    function ketikElemen(idElemen, teks, kecepatan, callback) {
+      const elemen = document.getElementById(idElemen);
+      if (!elemen) { if(callback) callback(); return; }
+      
+      elemen.innerHTML = '<span class="teks-diketik"></span><span class="kursor-ketik"></span>';
+      
+      const teksSpan = elemen.querySelector('.teks-diketik');
+      const kursor = elemen.querySelector('.kursor-ketik');
+      
+      let i = 0;
+      let waktuTerakhir = 0;
+
+      function loopKetik(timestamp) {
+        if (!waktuTerakhir) waktuTerakhir = timestamp;
+        if (timestamp - waktuTerakhir >= kecepatan) {
+          teksSpan.textContent = teks.substring(0, i + 1);
+          i++;
+          waktuTerakhir = timestamp;
+        }
+        if (i < teks.length) {
+          requestAnimationFrame(loopKetik);
+        } else {
+          if (kursor) kursor.remove();
+          if (callback) callback();
+        }
+      }
+      requestAnimationFrame(loopKetik); 
+    }
+
+    function mainkanLayar(nomor) {
+      const data = skripCerita[nomor];
+      if (!data) return;
+      
+      if (data.tombol) {
+        ketikElemen(`judul${nomor}`, data.judul, 30, () => {
+          ketikElemen(`pesan${nomor}`, data.pesan, 25, () => {
+            const tombolEl = document.getElementById(`tombol${nomor}`);
+            if (tombolEl) {
+              tombolEl.textContent = data.tombol;
+              tombolEl.classList.add('siap');
+              prosesTransisi = false; 
+            }
+            if (navigator.vibrate) navigator.vibrate(30); 
+          });
+        });
+      } else {
+        ketikElemen(`judul${nomor}`, data.judul, 30, () => {
+          ketikElemen(`pesan${nomor}`, data.pesan, 25, () => {
+            const elemenAkhir = document.getElementById(`pesan${nomor}`);
+            if (elemenAkhir) {
+              const kursorAkhir = document.createElement('span');
+              kursorAkhir.className = 'kursor-ketik';
+              elemenAkhir.appendChild(kursorAkhir);
+              setTimeout(() => kursorAkhir.remove(), 3000);
+            }
+          });
+        });
+      }
+    }
+
+    window.onload = () => {
+      setTimeout(() => mainkanLayar(1), 200); 
+    };
+
+    function gantiLayar(nomor) {
+      if (prosesTransisi) return; 
+      prosesTransisi = true; 
+      
+      document.querySelectorAll('.tombol-ketik').forEach(btn => {
+        btn.classList.remove('siap'); 
+      });
+
+      if (navigator.vibrate) navigator.vibrate([30, 40, 30]); 
+      
+      document.querySelectorAll('.layar').forEach(el => el.classList.remove('aktif'));
+      const targetLayar = document.getElementById('layar' + nomor);
+      if (targetLayar) targetLayar.classList.add('aktif');
+
+      if (nomor === 2) {
+        const musik = document.getElementById('musik-latar');
+        if (musik) musik.play().catch(() => {});
+      }
+
+      const judulEl = document.getElementById(`judul${nomor}`);
+      const pesanEl = document.getElementById(`pesan${nomor}`);
+      if (judulEl) judulEl.innerHTML = '';
+      if (pesanEl) pesanEl.innerHTML = '';
+
+      setTimeout(() => mainkanLayar(nomor), 400);
+    }
+
+    const kursorMouse = document.getElementById('kursor-mouse');
+    if (window.matchMedia("(pointer: fine)").matches && kursorMouse) {
+      document.addEventListener('mousemove', (e) => {
+        kursorMouse.style.left = e.clientX + 'px';
+        kursorMouse.style.top = e.clientY + 'px';
+        const bungkusAktif = document.querySelector('.layar.aktif .bungkus-kartu');
+        if (!bungkusAktif) return;
+        const x = (window.innerWidth / 2 - e.pageX) / 80;
+        const y = (window.innerHeight / 2 - e.pageY) / 80;
+        bungkusAktif.style.transform = `rotateY(${x}deg) rotateX(${y}deg)`;
+      });
+      document.addEventListener('mouseleave', () => {
+        document.querySelectorAll('.bungkus-kartu').forEach(el => el.style.transform = `rotateY(0deg) rotateX(0deg)`);
+      });
+    }
+  </script>
+</body>
+</html>
