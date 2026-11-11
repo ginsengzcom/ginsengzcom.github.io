@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, shrink-to-fit=no">
+  <title>404 - Not Found</title>
+  
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;700;800&display=swap" rel="stylesheet">
+  
+  <style>
+    :root {
+      --latar-kertas: #f4f4f5; 
+      --teks-tinta: #18181b; 
+      --abu-abu: #a1a1aa; 
+      --garis-buku: rgba(0, 0, 0, 0.12);
+    }
+
+    * { 
+      margin: 0; 
+      padding: 0; 
+      box-sizing: border-box; 
+      -webkit-tap-highlight-color: transparent;
+      -webkit-touch-callout: none;
+      -webkit-user-select: none;
+      user-select: none;
+    }
+
+    html, body {
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+      background: var(--latar-kertas);
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      color: var(--teks-tinta);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      perspective: 1000px; 
+    }
+
+    /* Tekstur Kertas Lembut */
+    .tekstur-kertas {
+      position: fixed;
+      inset: 0;
+      z-index: 1;
+      opacity: 0.4;
+      pointer-events: none;
+      background: url('data:image/svg+xml;utf8,%3Csvg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"%3E%3Cfilter id="noise"%3E%3CfeTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="3" stitchTiles="stitch"/%3E%3C/filter%3E%3Crect width="100%25" height="100%25" filter="url(%23noise)"/%3E%3C/svg%3E');
+      mix-blend-mode: multiply;
+    }
+
+    /* Kursor Khusus PC */
+    @media (pointer: fine) {
+      body { cursor: none; }
+      .kursor-sorot {
+        position: fixed;
+        width: 3.5vmin; height: 3.5vmin;
+        background: rgba(0, 0, 0, 0.1);
+        border: 1.5px solid var(--teks-tinta);
+        border-radius: 50%;
+        pointer-events: none;
+        z-index: 9999;
+        transform: translate(-50%, -50%);
+        transition: width 0.2s, height 0.2s;
+        display: block;
+      }
+    }
+    @media (pointer: coarse) { .kursor-sorot { display: none; } }
+
+    .layar {
+      position: absolute; 
+      top: 0; left: 0; width: 100vw; height: 100vh;
+      display: flex; 
+      flex-direction: column; 
+      justify-content: center; 
+      align-items: center;
+      z-index: 10;
+    }
+
+    .bungkus-kartu {
+      position: relative; 
+      width: 88vmin; 
+      max-height: 90vh;
+      display: flex;
+      justify-content: center;
+    }
+
+    /* Kartu Pesan dengan Efek Garis Buku & Bisa Scroll */
+    .kartu-pesan {
+      position: relative; 
+      background: #ffffff; 
+      border: 2px solid var(--teks-tinta); 
+      border-radius: 3vmin; 
+      padding: 7vmin 6vmin;
+      box-shadow: 1.5vmin 1.5vmin 0 var(--teks-tinta); 
+      width: 100%;
+      max-height: 88vh;
+      overflow-y: auto;
+      display: flex; 
+      flex-direction: column; 
+      align-items: center; 
+      text-align: center;
+      
+      background-image: repeating-linear-gradient(
+        transparent, 
+        transparent calc(6.5vmin - 2px), 
+        var(--garis-buku) calc(6.5vmin - 2px), 
+        var(--garis-buku) 6.5vmin
+      );
+      background-position: 0 0.8vmin; 
+      background-attachment: local;
+      
+      scrollbar-width: thin; 
+      scrollbar-color: var(--abu-abu) transparent;
+      touch-action: pan-y; 
+      contain: content;
+      transform: translateZ(0);
+    }
+
+    .kartu-pesan::-webkit-scrollbar { width: 1vmin; }
+    .kartu-pesan::-webkit-scrollbar-track { background: transparent; }
+    .kartu-pesan::-webkit-scrollbar-thumb {
+      background: var(--abu-abu);
+      border-radius: 1vmin;
+    }
+
+    /* Icon / Badge 404 */
+    .badge-error {
+      width: 18vmin;
+      height: 18vmin;
+      border: 2px solid var(--teks-tinta);
+      border-radius: 50%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-weight: 800;
+      font-size: 5.5vmin;
+      margin-bottom: 3vmin;
+      background: #ffffff;
+      box-shadow: 0.6vmin 0.6vmin 0 var(--teks-tinta);
+      flex-shrink: 0;
+    }
+
+    /* Angka 404 Besar */
+    h1 { 
+      font-weight: 800; 
+      font-size: 8vmin; 
+      color: var(--teks-tinta); 
+      margin-bottom: 1.5vmin;
+      line-height: 1.1;
+      letter-spacing: -0.1vmin;
+    }
+    
+    /* Sub-teks Keterangan */
+    .sub-teks {
+      font-size: 3.2vmin;
+      font-weight: 600;
+      color: var(--abu-abu);
+      letter-spacing: 0.1vmin;
+      margin-bottom: 3vmin;
+    }
+
+    /* Pesan Penjelasan */
+    .pesan-error {
+      width: 100%;
+      max-width: 70vmin;
+      font-size: 3.2vmin;
+      font-weight: 500;
+      color: var(--teks-tinta);
+      line-height: 5.5vmin;
+      padding-top: 2vmin;
+      padding-bottom: 3vmin;
+      border-top: 2px dashed var(--teks-tinta);
+      margin-bottom: 3vmin;
+    }
+
+    /* Tombol Kembali / Aksi */
+    .wadah-tombol {
+      width: 100%;
+      display: flex;
+      justify-content: center;
+    }
+
+    .tombol-aksi {
+      display: inline-block;
+      background: var(--teks-tinta); 
+      color: var(--latar-kertas);
+      border: 2px solid var(--teks-tinta);
+      padding: 3vmin 7vmin; 
+      border-radius: 2vmin;
+      font-size: 3.5vmin; 
+      font-weight: 700;
+      text-decoration: none;
+      box-shadow: 0.6vmin 0.6vmin 0 rgba(0,0,0,0.3);
+      transition: all 0.15s ease;
+      cursor: pointer;
+    }
+
+    .tombol-aksi:active { 
+      transform: translate(0.6vmin, 0.6vmin); 
+      box-shadow: 0 0 0 rgba(0,0,0,0);
+    }
+  </style>
+</head>
+<body>
+
+  <div class="kursor-sorot" id="kursor-mouse"></div>
+  <div class="tekstur-kertas"></div>
+
+  <!-- TAMPILAN 404 -->
+  <div class="layar">
+    <div class="bungkus-kartu">
+      <div class="kartu-pesan">
+        
+        <!-- BADGE ICON -->
+        <div class="badge-error">
+          <span>404</span>
+        </div>
+
+        <!-- JUDUL -->
+        <h1>HALAMAN HILANG</h1>
+
+        <!-- SUB TAHAP -->
+        <div class="sub-teks">ginsengz.com</div>
+
+        <!-- PESAN KETERANGAN -->
+        <div class="pesan-error">
+          Waduh, alamat atau halaman yang kamu cari gak ketemu atau mungkin udah dipindah. Coba cek lagi URL-nya ya, bestie!
+        </div>
+
+        <!-- TOMBOL KEMBALI -->
+        <div class="wadah-tombol">
+          <a href="https://ginsengz.com/" class="tombol-aksi">Kembali ke Beranda</a>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Kursor interaktif khusus PC
+    const kursorMouse = document.getElementById('kursor-mouse');
+    if (window.matchMedia("(pointer: fine)").matches && kursorMouse) {
+      document.addEventListener('mousemove', (e) => {
+        kursorMouse.style.left = e.clientX + 'px';
+        kursorMouse.style.top = e.clientY + 'px';
+        const bungkusKartu = document.querySelector('.bungkus-kartu');
+        if (!bungkusKartu) return;
+        const x = (window.innerWidth / 2 - e.pageX) / 80;
+        const y = (window.innerHeight / 2 - e.pageY) / 80;
+        bungkusKartu.style.transform = `rotateY(${x}deg) rotateX(${y}deg)`;
+      });
+      document.addEventListener('mouseleave', () => {
+        const bungkusKartu = document.querySelector('.bungkus-kartu');
+        if (bungkusKartu) bungkusKartu.style.transform = `rotateY(0deg) rotateX(0deg)`;
+      });
+    }
+  </script>
+</body>
+</html>
