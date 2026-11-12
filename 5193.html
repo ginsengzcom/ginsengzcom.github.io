@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, shrink-to-fit=no">
+  <title>5193</title>
+  
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  
+  <style>
+    :root {
+      --latar-kertas: #f4f4f5; 
+      --teks-tinta: #18181b; 
+      --abu-abu: #a1a1aa; 
+      --garis-buku: rgba(0, 0, 0, 0.12);
+    }
+
+    * { 
+      margin: 0; 
+      padding: 0; 
+      box-sizing: border-box; 
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    html, body {
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+      background: var(--latar-kertas);
+      touch-action: pan-y;
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      color: var(--teks-tinta);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      perspective: 1000px; 
+    }
+
+    .tekstur-kertas {
+      position: fixed;
+      inset: 0;
+      z-index: 1;
+      opacity: 0.4;
+      pointer-events: none;
+      background: url('data:image/svg+xml;utf8,%3Csvg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"%3E%3Cfilter id="noise"%3E%3CfeTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="3" stitchTiles="stitch"/%3E%3C/filter%3E%3Crect width="100%25" height="100%25" filter="url(%23noise)"/%3E%3C/svg%3E');
+      mix-blend-mode: multiply;
+    }
+
+    @media (pointer: fine) {
+      body { cursor: none; }
+      .kursor-sorot {
+        position: fixed;
+        width: 3.5vmin; height: 3.5vmin;
+        background: rgba(0, 0, 0, 0.1);
+        border: 1.5px solid var(--teks-tinta);
+        border-radius: 50%;
+        pointer-events: none;
+        z-index: 9999;
+        transform: translate(-50%, -50%);
+        transition: width 0.2s, height 0.2s;
+        display: block;
+      }
+    }
+    @media (pointer: coarse) { .kursor-sorot { display: none; } }
+
+    .layar {
+      position: absolute; 
+      top: 0; left: 0; width: 100vw; height: 100vh;
+      display: flex; 
+      flex-direction: column; 
+      justify-content: center; 
+      align-items: center;
+      z-index: 10;
+    }
+
+    /* UKURAN DIKUNCI PROPORSIONAL (SAMA DI HP & DESKTOP) */
+    .bungkus-kartu {
+      position: relative; 
+      width: 88vmin; 
+      transition: transform 0.3s ease-out, opacity 0.3s ease;
+    }
+
+    .kartu-pesan {
+      position: relative; 
+      background: #ffffff; 
+      border: 2px solid var(--teks-tinta); 
+      border-radius: 3vmin; 
+      padding: 5.5vmin 5vmin;
+      box-shadow: 1.5vmin 1.5vmin 0 var(--teks-tinta); 
+      width: 100%;
+      display: flex; 
+      flex-direction: column; 
+      align-items: flex-start; 
+    }
+
+    .header-kartu {
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 3vmin;
+    }
+
+    .wadah-emoji {
+      width: 12vmin;
+      height: 12vmin;
+      background: #ffffff;
+      border: 2px solid var(--teks-tinta);
+      border-radius: 50%; 
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 6.5vmin;
+      box-shadow: 0.6vmin 0.6vmin 0 var(--teks-tinta);
+    }
+
+    .badge-nomor {
+      background: var(--teks-tinta);
+      color: var(--latar-kertas);
+      font-size: 3vmin;
+      font-weight: 800;
+      padding: 1vmin 2.5vmin;
+      border-radius: 2vmin;
+    }
+
+    h2 { 
+      font-weight: 800; 
+      font-size: 5vmin; 
+      color: var(--teks-tinta); 
+      margin-bottom: 2vmin;
+      line-height: 1.25;
+    }
+    
+    .pesan-teks {
+      width: 100%;
+      color: var(--teks-tinta); 
+      font-size: 3.7vmin; 
+      line-height: 6vmin; 
+      font-weight: 500;
+      margin-bottom: 3.5vmin; 
+      text-align: left;
+      padding-left: 3.5vmin;
+      border-left: 3px solid var(--teks-tinta); 
+      
+      background-image: repeating-linear-gradient(
+        transparent, 
+        transparent calc(6vmin - 2px), 
+        var(--garis-buku) calc(6vmin - 2px), 
+        var(--garis-buku) 6vmin
+      );
+      background-position: 0 0.6vmin; 
+    }
+
+    /* INPUT JAWABAN MANUAL */
+    .kotak-input {
+      width: 100%;
+      height: 20vmin;
+      background: #fafafa;
+      border: 2px solid var(--teks-tinta);
+      border-radius: 2vmin;
+      padding: 2.5vmin 3vmin;
+      font-family: inherit;
+      font-size: 3.6vmin;
+      font-weight: 600;
+      color: var(--teks-tinta);
+      resize: none;
+      outline: none;
+      margin-bottom: 3.5vmin;
+      box-shadow: inset 0.4vmin 0.4vmin 0 rgba(0,0,0,0.06);
+      transition: all 0.2s ease;
+    }
+
+    .kotak-input:focus {
+      background: #ffffff;
+      box-shadow: 0.6vmin 0.6vmin 0 var(--teks-tinta);
+    }
+
+    .kotak-input::placeholder {
+      color: var(--abu-abu);
+      font-weight: 500;
+    }
+
+    /* AREA REKAP AKHIR (YANG AKAN DIJADIKAN FOTO) */
+    .wadah-rekap {
+      width: 100%;
+      max-height: 36vmin;
+      overflow-y: auto;
+      border: 2px solid var(--teks-tinta);
+      border-radius: 2vmin;
+      padding: 3.5vmin;
+      background: #ffffff;
+      margin-bottom: 3vmin;
+      display: none;
+      flex-direction: column;
+      gap: 2.5vmin;
+      scrollbar-width: thin;
+      scrollbar-color: var(--abu-abu) transparent;
+    }
+
+    .wadah-rekap::-webkit-scrollbar { width: 0.6vmin; }
+    .wadah-rekap::-webkit-scrollbar-thumb {
+      background: var(--abu-abu);
+      border-radius: 1vmin;
+    }
+
+    .item-rekap {
+      border-bottom: 1.5px dashed var(--abu-abu);
+      padding-bottom: 2vmin;
+    }
+    .item-rekap:last-child {
+      border-bottom: none;
+      padding-bottom: 0;
+    }
+    .rekap-tanya {
+      font-size: 3vmin;
+      font-weight: 800;
+      color: #52525b;
+      margin-bottom: 0.8vmin;
+    }
+    .rekap-jawab {
+      font-size: 3.5vmin;
+      font-weight: 700;
+      color: var(--teks-tinta);
+      white-space: pre-wrap;
+      word-wrap: break-word;
+    }
+
+    /* TOMBOL AKSI */
+    .wadah-tombol {
+      width: 100%;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 2vmin;
+    }
+
+    .tombol-aksi {
+      flex: 1;
+      min-width: 45%;
+      background: var(--teks-tinta); 
+      color: var(--latar-kertas);
+      border: 2px solid var(--teks-tinta);
+      padding: 2.4vmin 2.5vmin; 
+      border-radius: 2vmin;
+      font-size: 3.4vmin; 
+      font-weight: 800;
+      font-family: inherit;
+      cursor: pointer;
+      box-shadow: 0.6vmin 0.6vmin 0 rgba(0,0,0,0.3);
+      transition: transform 0.1s ease, box-shadow 0.1s ease;
+      text-align: center;
+    }
+
+    .tombol-aksi:active { 
+      transform: translate(0.5vmin, 0.5vmin); 
+      box-shadow: 0 0 0 rgba(0,0,0,0);
+    }
+
+    .tombol-penuh {
+      flex: 1 1 100%;
+    }
+
+    .tombol-sekunder {
+      background: #ffffff;
+      color: var(--teks-tinta);
+    }
+
+    .kursor-ketik {
+      display: inline-block; 
+      width: 0.7vmin; 
+      height: 3.5vmin;
+      background-color: var(--teks-tinta); 
+      vertical-align: middle;
+      animation: kedip 0.8s infinite; 
+      margin-left: 0.4vmin;
+    }
+    @keyframes kedip { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+
+    .peringatan-kosong {
+      color: #dc2626;
+      font-size: 3vmin;
+      font-weight: 700;
+      margin-top: -2vmin;
+      margin-bottom: 2vmin;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="kursor-sorot" id="kursor-mouse"></div>
+  <div class="tekstur-kertas"></div>
+  
+  <audio id="musik-latar" src="https://feeldreampic.github.io/audio/nightchanges.mp3" loop></audio>
+
+  <div class="layar">
+    <div class="bungkus-kartu" id="kartuUtama">
+      <div class="kartu-pesan">
+        
+        <div class="header-kartu">
+          <div class="wadah-emoji" id="emojiPertanyaan">👀</div>
+          <div class="badge-nomor" id="nomorPertanyaan">1 / 5</div>
+        </div>
+
+        <h2 id="judulPertanyaan"></h2>
+        <div class="pesan-teks" id="teksPertanyaan"></div>
+
+        <!-- AREA INPUT KETIK -->
+        <textarea 
+          id="inputJawaban" 
+          class="kotak-input" 
+          placeholder="Ketik jujur di sini ya, no bohong-bohong club..."
+        ></textarea>
+        <div class="peringatan-kosong" id="peringatanKosong">Eits, isi dulu dong jangan dikosongin 😤</div>
+
+        <!-- AREA REKAP JAWABAN (TARGET UNDUH GAMBAR) -->
+        <div class="wadah-rekap" id="wadahRekap"></div>
+
+        <!-- TOMBOL -->
+        <div class="wadah-tombol" id="wadahTombol">
+          <button class="tombol-aksi tombol-penuh" id="btnLanjut" onclick="lanjutPertanyaan()">Lanjut Gas ➡️</button>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const nomorWA = ""; 
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const namaTarget = (urlParams.get('name') || '').trim() || 'Kamu';
+
+    const daftarPertanyaan = [
+      {
+        emoji: "👀",
+        judul: `First Impression ke Aku`,
+        tanya: `Jujur nih ${namaTarget}, pas awal-awal kita kenal atau deket, vibe aku di mata kamu tuh kayak gimana sih? Ngeselin apa ngangenin?`,
+        placeholder: "Spill kesan pertama kamu di sini..."
+      },
+      {
+        emoji: "🫶",
+        judul: "Safe Space Check",
+        tanya: "Sejauh ini, kalau lagi capek sama dunia atau overthinking, aku udah cukup jadi tempat pulang yang nyaman belum buat kamu?",
+        placeholder: "Ceritain aja sejujurnya..."
+      },
+      {
+        emoji: "🫣",
+        judul: "Definisi Kita Sekarang",
+        tanya: "Menurut kamu, hubungan atau kedekatan kita sekarang ini arahnya lagi ke mana? Lagi jalan di tempat, HTS, atau udah serius?",
+        placeholder: "No gengsi-gengsi, ketik aja..."
+      },
+      {
+        emoji: "🚩",
+        judul: "Green Flag vs Red Flag",
+        tanya: "Satu hal dari sikap aku yang paling kamu suka, dan satu hal yang sebenernya bikin kamu ilfeel tapi kamu pendem terus?",
+        placeholder: "Aku siap nerima kenyataan kok..."
+      },
+      {
+        emoji: "💌",
+        judul: "Last Question, No Counter!",
+        tanya: `Kalau perasaan kamu ke aku disuruh jelasin pakai satu kalimat jujur hari ini, ${namaTarget} mau bilang apa?`,
+        placeholder: "Tulis isi hati kamu paling dalem di sini..."
+      }
+    ];
+
+    let indeksSekarang = 0;
+    let kumpulanJawaban = [];
+
+    function efekKetik(idElemen, teks, kecepatan, callback) {
+      const el = document.getElementById(idElemen);
+      el.innerHTML = '<span class="teks-diketik"></span><span class="kursor-ketik"></span>';
+      const spanTeks = el.querySelector('.teks-diketik');
+      const kursor = el.querySelector('.kursor-ketik');
+      
+      let i = 0;
+      let lastTime = 0;
+
+      function loop(timestamp) {
+        if (!lastTime) lastTime = timestamp;
+        if (timestamp - lastTime >= kecepatan) {
+          spanTeks.textContent = teks.substring(0, i + 1);
+          i++;
+          lastTime = timestamp;
+        }
+        if (i < teks.length) {
+          requestAnimationFrame(loop);
+        } else {
+          if (kursor) kursor.remove();
+          if (callback) callback();
+        }
+      }
+      requestAnimationFrame(loop);
+    }
+
+    function muatPertanyaan(indeks) {
+      const data = daftarPertanyaan[indeks];
+      const inputEl = document.getElementById('inputJawaban');
+      const peringatanEl = document.getElementById('peringatanKosong');
+      
+      peringatanEl.style.display = 'none';
+      inputEl.value = '';
+      inputEl.placeholder = data.placeholder;
+      
+      document.getElementById('emojiPertanyaan').innerText = data.emoji;
+      document.getElementById('nomorPertanyaan').innerText = `${indeks + 1} / ${daftarPertanyaan.length}`;
+      
+      if (indeks === daftarPertanyaan.length - 1) {
+        document.getElementById('btnLanjut').innerText = "Selesai & Lihat Hasil ✨";
+      }
+
+      document.getElementById('judulPertanyaan').innerHTML = '';
+      document.getElementById('teksPertanyaan').innerHTML = '';
+
+      efekKetik('judulPertanyaan', data.judul, 25, () => {
+        efekKetik('teksPertanyaan', data.tanya, 20, () => {
+          inputEl.focus();
+        });
+      });
+    }
+
+    function lanjutPertanyaan() {
+      const musik = document.getElementById('musik-latar');
+      if (musik && musik.paused) {
+        musik.play().catch(() => {});
+      }
+
+      const inputEl = document.getElementById('inputJawaban');
+      const jawaban = inputEl.value.trim();
+      const peringatanEl = document.getElementById('peringatanKosong');
+
+      if (!jawaban) {
+        peringatanEl.style.display = 'block';
+        if (navigator.vibrate) navigator.vibrate([50, 50, 50]);
+        inputEl.focus();
+        return;
+      }
+
+      if (navigator.vibrate) navigator.vibrate(30);
+
+      kumpulanJawaban.push({
+        tanya: daftarPertanyaan[indeksSekarang].judul,
+        jawab: jawaban
+      });
+
+      const kartu = document.getElementById('kartuUtama');
+      kartu.style.opacity = '0';
+      kartu.style.transform = 'translateY(2vmin) scale(0.97)';
+
+      setTimeout(() => {
+        indeksSekarang++;
+        if (indeksSekarang < daftarPertanyaan.length) {
+          muatPertanyaan(indeksSekarang);
+        } else {
+          tampilkanRekapAkhir();
+        }
+        kartu.style.opacity = '1';
+        kartu.style.transform = 'translateY(0) scale(1)';
+      }, 250);
+    }
+
+    function tampilkanRekapAkhir() {
+      document.getElementById('emojiPertanyaan').innerText = "💖";
+      document.getElementById('nomorPertanyaan').innerText = "SELESAI";
+      document.getElementById('judulPertanyaan').innerText = `Spill Isi Hati: ${namaTarget}`;
+      document.getElementById('teksPertanyaan').innerText = "Ini rangkuman jawaban jujur kamu hari ini. Unduh fotonya atau langsung kirim ya!";
+      
+      document.getElementById('inputJawaban').style.display = 'none';
+      document.getElementById('peringatanKosong').style.display = 'none';
+
+      const wadahRekap = document.getElementById('wadahRekap');
+      wadahRekap.style.display = 'flex';
+      wadahRekap.innerHTML = '';
+
+      kumpulanJawaban.forEach((item, index) => {
+        const div = document.createElement('div');
+        div.className = 'item-rekap';
+        div.innerHTML = `
+          <div class="rekap-tanya">${index + 1}. ${item.tanya}</div>
+          <div class="rekap-jawab">"${item.jawab}"</div>
+        `;
+        wadahRekap.appendChild(div);
+      });
+
+      const wadahTombol = document.getElementById('wadahTombol');
+      wadahTombol.innerHTML = `
+        <button class="tombol-aksi tombol-penuh" id="btnUnduh" onclick="unduhGambar()">Unduh Jadi Foto 📸</button>
+        <button class="tombol-aksi tombol-sekunder" onclick="salinJawaban()">Salin Teks 📋</button>
+        <button class="tombol-aksi" onclick="kirimWhatsApp()">Kirim ke WA 💬</button>
+      `;
+    }
+
+    // HANYA MEMOTRET KOTAK PERTANYAAN & JAWABAN (#wadahRekap)
+    function unduhGambar() {
+      const btnUnduh = document.getElementById('btnUnduh');
+      const teksAsli = btnUnduh.innerText;
+      btnUnduh.innerText = "Lagi motret... ⏳";
+      btnUnduh.disabled = true;
+
+      const kartuWrapper = document.getElementById('kartuUtama');
+      const wadahRekap = document.getElementById('wadahRekap');
+
+      // Reset rotasi 3D sementara agar garis kotak lurus 100%
+      kartuWrapper.style.transform = 'none';
+
+      // Simpan gaya asli sebelum dibuka penuh
+      const maxHeightAsli = wadahRekap.style.maxHeight;
+      const overflowAsli = wadahRekap.style.overflowY;
+
+      // Buka penuh seluruh daftar pertanyaan & jawaban agar tidak terpotong scroll
+      wadahRekap.style.maxHeight = 'none';
+      wadahRekap.style.overflowY = 'visible';
+
+      html2canvas(wadahRekap, {
+        scale: 3,
+        backgroundColor: '#ffffff',
+        useCORS: true
+      }).then(canvas => {
+        // Kembalikan ukuran kotak scroll seperti semula
+        wadahRekap.style.maxHeight = maxHeightAsli;
+        wadahRekap.style.overflowY = overflowAsli;
+        btnUnduh.innerText = teksAsli;
+        btnUnduh.disabled = false;
+
+        const link = document.createElement('a');
+        const namaFile = namaTarget.toLowerCase().replace(/[^a-z0-9]/g, '-');
+        link.download = `spill-isi-hati-${namaFile}.png`;
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+
+        if (navigator.vibrate) navigator.vibrate([30, 50, 30]);
+      }).catch(() => {
+        wadahRekap.style.maxHeight = maxHeightAsli;
+        wadahRekap.style.overflowY = overflowAsli;
+        btnUnduh.innerText = teksAsli;
+        btnUnduh.disabled = false;
+        alert("Gagal memotret kotak jawaban, coba screenshot manual ya!");
+      });
+    }
+
+    function buatTeksRekap() {
+      let teks = `*SPILL ISI HATI DARI ${namaTarget.toUpperCase()}* 💌\n\n`;
+      kumpulanJawaban.forEach((item, idx) => {
+        teks += `*${idx + 1}. ${item.tanya}*\nJawaban: ${item.jawab}\n\n`;
+      });
+      return teks.trim();
+    }
+
+    function salinJawaban() {
+      const teks = buatTeksRekap();
+      navigator.clipboard.writeText(teks).then(() => {
+        alert("Jawaban berhasil disalin! Tinggal paste di chat ya ✨");
+      });
+    }
+
+    function kirimWhatsApp() {
+      const teks = encodeURIComponent(buatTeksRekap());
+      const urlWA = nomorWA 
+        ? `https://wa.me/${nomorWA}?text=${teks}` 
+        : `https://api.whatsapp.com/send?text=${teks}`;
+      window.open(urlWA, '_blank');
+    }
+
+    window.onload = () => {
+      setTimeout(() => muatPertanyaan(0), 300);
+    };
+
+    const kursorMouse = document.getElementById('kursor-mouse');
+    if (window.matchMedia("(pointer: fine)").matches && kursorMouse) {
+      document.addEventListener('mousemove', (e) => {
+        kursorMouse.style.left = e.clientX + 'px';
+        kursorMouse.style.top = e.clientY + 'px';
+        const kartu = document.getElementById('kartuUtama');
+        if (!kartu) return;
+        const x = (window.innerWidth / 2 - e.pageX) / 90;
+        const y = (window.innerHeight / 2 - e.pageY) / 90;
+        kartu.style.transform = `rotateY(${x}deg) rotateX(${y}deg)`;
+      });
+      document.addEventListener('mouseleave', () => {
+        const kartu = document.getElementById('kartuUtama');
+        if (kartu) kartu.style.transform = `rotateY(0deg) rotateX(0deg)`;
+      });
+    }
+  </script>
+</body>
+</html>
