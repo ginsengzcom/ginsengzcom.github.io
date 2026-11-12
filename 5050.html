@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, shrink-to-fit=no">
+  <title>5050</title>
+  
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;700;800&display=swap" rel="stylesheet">
+  
+  <style>
+    :root {
+      --latar-kertas: #f4f4f5; 
+      --teks-tinta: #18181b; 
+      --abu-abu: #a1a1aa; 
+      --garis-buku: rgba(0, 0, 0, 0.12);
+    }
+
+    * { 
+      margin: 0; 
+      padding: 0; 
+      box-sizing: border-box; 
+      -webkit-tap-highlight-color: transparent;
+      -webkit-touch-callout: none;
+      -webkit-user-select: none;
+      user-select: none;
+    }
+
+    html, body {
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+      background: var(--latar-kertas);
+      touch-action: pan-y; 
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      color: var(--teks-tinta);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      perspective: 1000px; 
+      cursor: pointer; 
+    }
+
+    .tekstur-kertas {
+      position: fixed;
+      inset: 0;
+      z-index: 1;
+      opacity: 0.4;
+      pointer-events: none;
+      background: url('data:image/svg+xml;utf8,%3Csvg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"%3E%3Cfilter id="noise"%3E%3CfeTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="3" stitchTiles="stitch"/%3E%3C/filter%3E%3Crect width="100%25" height="100%25" filter="url(%23noise)"/%3E%3C/svg%3E');
+      mix-blend-mode: multiply;
+    }
+
+    @media (pointer: fine) {
+      body { cursor: none; }
+      .kursor-sorot {
+        position: fixed;
+        width: 3.5vmin; height: 3.5vmin;
+        background: rgba(0, 0, 0, 0.1);
+        border: 1.5px solid var(--teks-tinta);
+        border-radius: 50%;
+        pointer-events: none;
+        z-index: 9999;
+        transform: translate(-50%, -50%);
+        transition: width 0.2s, height 0.2s;
+        display: block;
+      }
+    }
+    @media (pointer: coarse) { .kursor-sorot { display: none; } }
+
+    .layar {
+      position: absolute; 
+      top: 0; left: 0; width: 100vw; height: 100vh;
+      display: flex; 
+      flex-direction: column; 
+      justify-content: center; 
+      align-items: center;
+      z-index: 10;
+    }
+
+    .bungkus-kartu {
+      position: relative; 
+      width: 88vmin; 
+      transition: transform 0.4s ease-out;
+    }
+
+    .kartu-pesan {
+      position: relative; 
+      background: #ffffff; 
+      border: 2px solid var(--teks-tinta); 
+      border-radius: 3vmin; 
+      padding: 6vmin 5vmin;
+      box-shadow: 1.5vmin 1.5vmin 0 var(--teks-tinta); 
+      width: 100%;
+      display: flex; 
+      flex-direction: column; 
+      align-items: flex-start; 
+      justify-content: center;
+      contain: paint layout; 
+    }
+
+    /* HEADER 2 PROFIL */
+    .header-profil {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      width: 100%;
+      margin-bottom: 4vmin;
+    }
+    .profil {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 35%;
+      opacity: 0.4;
+      transition: all 0.3s cubic-bezier(0.2, 1, 0.3, 1);
+      transform: scale(0.9);
+    }
+    .profil.aktif {
+      opacity: 1;
+      transform: scale(1);
+    }
+    .profil.aktif .wadah-emoji {
+      animation: goyang 0.4s ease;
+      box-shadow: 0.8vmin 0.8vmin 0 var(--teks-tinta);
+    }
+    .wadah-emoji {
+      width: 12vmin;
+      height: 12vmin;
+      background: #ffffff;
+      border: 2px solid var(--teks-tinta);
+      border-radius: 50%; 
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 6.5vmin;
+      margin-bottom: 1.5vmin;
+      box-shadow: 0.4vmin 0.4vmin 0 var(--teks-tinta);
+      transition: all 0.3s ease;
+    }
+    .nama-profil {
+      font-size: 3vmin;
+      font-weight: 800;
+      background: var(--teks-tinta);
+      color: var(--latar-kertas);
+      padding: 0.5vmin 2.5vmin;
+      border-radius: 1.5vmin;
+      border: 1.5px solid var(--teks-tinta);
+      text-align: center;
+      max-width: 100%;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .tengah-love {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 12vmin; 
+      font-size: 5vmin;
+      animation: detak 1.2s infinite alternate;
+    }
+
+    @keyframes detak {
+      0% { transform: scale(0.9); }
+      100% { transform: scale(1.3); }
+    }
+    @keyframes goyang {
+      0%, 100% { transform: rotate(0deg); }
+      25% { transform: rotate(-10deg); }
+      75% { transform: rotate(10deg); }
+    }
+
+    h2 { 
+      font-weight: 800; 
+      font-size: 5vmin; 
+      color: var(--teks-tinta); 
+      margin-bottom: 2vmin;
+      line-height: 1.2;
+      transform: translateZ(0);
+    }
+    
+    .pesan-teks {
+      width: 100%;
+      color: var(--teks-tinta); 
+      font-size: 3.8vmin; 
+      font-weight: 500;
+      min-height: 13vmin;     
+      max-height: 48vh; 
+      overflow-y: auto;       
+      margin-bottom: 2vmin; 
+      padding-left: 4vmin;
+      padding-right: 2vmin;
+      border-left: 3px solid var(--teks-tinta); 
+      
+      background-image: repeating-linear-gradient(
+        transparent, 
+        transparent calc(6.5vmin - 2px), 
+        var(--garis-buku) calc(6.5vmin - 2px), 
+        var(--garis-buku) 6.5vmin
+      );
+      background-position: 0 0.8vmin; 
+      background-attachment: local; 
+      
+      scrollbar-width: thin; 
+      scrollbar-color: var(--abu-abu) transparent;
+      contain: content;
+      transform: translateZ(0);
+    }
+
+    /* BARIS CHAT KIRI KANAN */
+    .baris-chat {
+      width: 100%;
+      line-height: 6.5vmin;
+      min-height: 6.5vmin; 
+      word-wrap: break-word;
+    }
+    .baris-chat.kiri {
+      text-align: left;
+    }
+    .baris-chat.kanan {
+      text-align: right;
+      font-weight: 700;
+    }
+
+    /* GAMBAR CHAT */
+    .chat-gambar {
+      max-width: 55%; 
+      border-radius: 2vmin;
+      border: 2px solid var(--teks-tinta);
+      box-shadow: 0.6vmin 0.6vmin 0 var(--teks-tinta);
+      margin-top: 1vmin;
+      margin-bottom: 0.5vmin;
+      display: inline-block;
+      vertical-align: middle;
+      animation: popInGambar 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+      opacity: 0;
+      transform: scale(0.8);
+    }
+
+    @keyframes popInGambar {
+      to { opacity: 1; transform: scale(1); }
+    }
+
+    .pesan-teks::-webkit-scrollbar { width: 0.6vmin; }
+    .pesan-teks::-webkit-scrollbar-track { background: transparent; }
+    .pesan-teks::-webkit-scrollbar-thumb {
+      background: var(--abu-abu);
+      border-radius: 1vmin;
+    }
+
+    .kursor-ketik {
+      display: inline-block; 
+      width: 0.8vmin; 
+      height: 4vmin;
+      background-color: var(--teks-tinta); 
+      vertical-align: middle;
+      animation: kedip 0.8s infinite; 
+      margin-left: 0.5vmin;
+    }
+    
+    @keyframes kedip { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+
+    .petunjuk-klik {
+      width: 100%;
+      text-align: center;
+      font-size: 3vmin;
+      color: var(--abu-abu);
+      font-weight: 700;
+      opacity: 0;
+      transition: opacity 0.5s ease;
+      animation: pulse 1.5s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="kursor-sorot" id="kursor-mouse"></div>
+  <div class="tekstur-kertas"></div>
+  
+  <audio id="musik-latar" src="https://feeldreampic.github.io/audio/nightchanges.mp3" loop></audio>
+
+  <div class="layar" id="layarUtama">
+    <div class="bungkus-kartu">
+      <div class="kartu-pesan">
+        
+        <div class="header-profil">
+          <div class="profil" id="profilKiri">
+            <div class="wadah-emoji">👦</div>
+            <div class="nama-profil" id="teksKiri">Aku</div>
+          </div>
+          <div class="tengah-love">💖</div>
+          <div class="profil" id="profilKanan">
+            <div class="wadah-emoji">👧</div>
+            <div class="nama-profil" id="teksKanan">Kamu</div>
+          </div>
+        </div>
+
+        <h2 id="judulUtama"></h2>
+        <div class="pesan-teks" id="pesanUtama"></div>
+        <div class="petunjuk-klik" id="petunjukKlik">(Ketuk layar untuk lanjut)</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // --- CUSTOM NAMA LEWAT LINK (?left=Nama1&right=Nama2) ---
+    const urlParams = new URLSearchParams(window.location.search);
+    const namaKiri = (urlParams.get('left') || '').trim() || 'Aku';
+    const namaKanan = (urlParams.get('right') || '').trim() || 'Kamu';
+
+    document.getElementById('teksKiri').innerText = namaKiri;
+    document.getElementById('teksKanan').innerText = namaKanan;
+
+    function formatTeks(teks) {
+      if (!teks) return ""; 
+      return teks
+        .replace(/\{kiri\}/gi, namaKiri)
+        .replace(/\{kanan\}/gi, namaKanan);
+    }
+
+    const dataCerita = [
+      {
+        judul: "Panggilan Kepada {kanan} 📢", 
+        pesan: [
+          { teks: "Mana nih kesayangankuu 💘💘", pengirim: "kiri" },
+          { teks: "Sayangg", pengirim: "kiri" },
+          { gambar: "", teks: "Iyaa, ini akuu 💕", pengirim: "kanan" }, 
+          { teks: "{kanan} tercantikkuu 🤍🤍🌺🌺🌺", pengirim: "kiri" },
+
+          { teks: "Manaaa nihh🥺🥺", pengirim: "kiri" },
+          { teks: "{kiri} tungguin deh dari tadi 🌺🌺💘💘🤍", pengirim: "kiri" },
+          { teks: "Maaf yaa, baru megang hp 🥺", pengirim: "kanan" }, 
+          { teks: "Akuuuuuuuuuu kangennnnnnnn bangettt🌺🌺💘💘😘", pengirim: "kiri" },
+
+          { teks: "Kesayangan nya {kiri}", pengirim: "kiri" },
+          { teks: "Hadirr cintaaa 🙋‍♀️", pengirim: "kanan" }, 
+          { teks: "Mana nihhh kesayangannya {kiri}🌺🌺🤍", pengirim: "kiri" },
+          { teks: "{kiri} udah kangennnn🥺😘🌺🌺💘💘", pengirim: "kiri" },
+
+          { teks: "Nanti temenin {kiri} bobo yah {kanan}🥰🌺🌺💘💘💘💘", pengirim: "kiri" },
+          { teks: "Iyaaa nanti ditemenin sampe pules 🧸", pengirim: "kanan" }, 
+          { teks: "Kesayangankuu mana yah💖💖", pengirim: "kiri" },
+          { teks: "Capek gak hari iniii", pengirim: "kiri" },
+
+          { teks: "Lumayan capek hari ini 😫", pengirim: "kanan" }, 
+          { teks: "Kasihannyaa pacal akuu🥺🥺🫂🫂", pengirim: "kiri" },
+          { teks: "Nanti kalo udah ganti baju sama udah mam bobo yh istirahat yh kan capek", pengirim: "kiri" },
+          { teks: "Misal nyaa {kiri} nanti gak balas, masih kerjaaa yh {kanan}", pengirim: "kiri" },
+          { teks: "emmmmmmmmmmmmmmuach cemangat gantengkuuu {kiri}", pengirim: "kanan"}
+        ]
+      }
+    ];
+
+    let indeksCerita = 0;
+    let indeksParagraf = 0; 
+    let siapLanjut = false;
+    let elemenLagiNgetik = false; 
+
+    function ketikJudul(teks, kecepatan, callback) {
+      elemenLagiNgetik = true;
+      const elemen = document.getElementById('judulUtama');
+      elemen.innerHTML = '<span class="teks-diketik"></span><span class="kursor-ketik"></span>';
+      const teksSpan = elemen.querySelector('.teks-diketik');
+      const kursor = elemen.querySelector('.kursor-ketik');
+      
+      let i = 0;
+      let waktuTerakhir = 0;
+
+      function loopKetik(timestamp) {
+        if (!waktuTerakhir) waktuTerakhir = timestamp;
+        if (timestamp - waktuTerakhir >= kecepatan) {
+          teksSpan.textContent = teks.substring(0, i + 1);
+          i++;
+          waktuTerakhir = timestamp;
+        }
+        if (i < teks.length) {
+          requestAnimationFrame(loopKetik);
+        } else {
+          kursor.remove();
+          elemenLagiNgetik = false;
+          if (callback) callback();
+        }
+      }
+      requestAnimationFrame(loopKetik); 
+    }
+
+    function ketikParagrafTambahan(chatObj, kecepatan, callback) {
+      elemenLagiNgetik = true;
+      const elemenPesan = document.getElementById('pesanUtama');
+      
+      const kursorLama = elemenPesan.querySelector('.kursor-ketik');
+      if (kursorLama) kursorLama.remove();
+
+      const divBaris = document.createElement('div');
+      divBaris.className = `baris-chat ${chatObj.pengirim}`;
+
+      if (chatObj.gambar) {
+        const img = document.createElement('img');
+        img.src = chatObj.gambar;
+        img.className = 'chat-gambar';
+        
+        img.onload = () => { elemenPesan.scrollTop = elemenPesan.scrollHeight; };
+        img.onerror = () => { img.style.display = 'none'; };
+        
+        divBaris.appendChild(img);
+        
+        if (chatObj.teks) {
+          divBaris.appendChild(document.createElement('br'));
+        }
+      }
+
+      const spanTeks = document.createElement('span');
+      spanTeks.className = 'teks-diketik';
+      divBaris.appendChild(spanTeks);
+
+      const kursorBaru = document.createElement('span');
+      kursorBaru.className = 'kursor-ketik';
+      
+      elemenPesan.appendChild(divBaris);
+
+      const teksYangDiketik = formatTeks(chatObj.teks);
+      
+      let i = 0;
+      let waktuTerakhir = 0;
+
+      if (teksYangDiketik.length > 0) {
+        divBaris.appendChild(kursorBaru);
+
+        function loopKetik(timestamp) {
+          if (!waktuTerakhir) waktuTerakhir = timestamp;
+          if (timestamp - waktuTerakhir >= kecepatan) {
+            spanTeks.textContent = teksYangDiketik.substring(0, i + 1);
+            i++;
+            waktuTerakhir = timestamp;
+            
+            elemenPesan.scrollTop = elemenPesan.scrollHeight;
+          }
+          if (i < teksYangDiketik.length) {
+            requestAnimationFrame(loopKetik);
+          } else {
+            elemenLagiNgetik = false;
+            if (callback) callback(kursorBaru);
+          }
+        }
+        requestAnimationFrame(loopKetik);
+      } else {
+        setTimeout(() => {
+          elemenPesan.scrollTop = elemenPesan.scrollHeight;
+          elemenLagiNgetik = false;
+          if (callback) callback(null); 
+        }, 500);
+      }
+    }
+
+    function jalankanCerita() {
+      siapLanjut = false;
+      document.getElementById('petunjukKlik').style.opacity = '0';
+      
+      const data = dataCerita[indeksCerita];
+      
+      if (indeksParagraf === 0) {
+        document.getElementById('profilKiri').classList.remove('aktif');
+        document.getElementById('profilKanan').classList.remove('aktif');
+        
+        document.getElementById('judulUtama').innerHTML = '';
+        document.getElementById('pesanUtama').innerHTML = '';
+
+        const judulDiolah = formatTeks(data.judul);
+        ketikJudul(judulDiolah, 30, () => {
+          mulaiKetikChat();
+        });
+      } else {
+        mulaiKetikChat();
+      }
+    }
+
+    function mulaiKetikChat() {
+      const data = dataCerita[indeksCerita];
+      const chatSekarang = data.pesan[indeksParagraf];
+      const arahPengirim = chatSekarang.pengirim;
+      
+      document.getElementById('profilKiri').classList.remove('aktif');
+      document.getElementById('profilKanan').classList.remove('aktif');
+      
+      if (arahPengirim === 'kiri') {
+        document.getElementById('profilKiri').classList.add('aktif');
+      } else {
+        document.getElementById('profilKanan').classList.add('aktif');
+      }
+
+      ketikParagrafTambahan(chatSekarang, 25, (kursorAktif) => {
+        siapLanjut = true;
+        
+        const isAkhirCerita = (indeksCerita === dataCerita.length - 1 && indeksParagraf === data.pesan.length - 1);
+        
+        if (!isAkhirCerita) {
+          document.getElementById('petunjukKlik').style.opacity = '1';
+        } else {
+          document.getElementById('profilKiri').classList.remove('aktif');
+          document.getElementById('profilKanan').classList.remove('aktif');
+          setTimeout(() => { if (kursorAktif) kursorAktif.remove(); }, 3000);
+        }
+        
+        if (navigator.vibrate) navigator.vibrate(30); 
+      });
+    }
+
+    document.body.addEventListener('click', () => {
+      const musik = document.getElementById('musik-latar');
+      if (musik && musik.paused) {
+        musik.play().catch(() => {});
+      }
+
+      if (!siapLanjut || elemenLagiNgetik) return;
+      
+      const data = dataCerita[indeksCerita];
+      const isAkhirCerita = (indeksCerita === dataCerita.length - 1 && indeksParagraf === data.pesan.length - 1);
+      
+      if (isAkhirCerita) return; 
+      
+      if (navigator.vibrate) navigator.vibrate([30, 40, 30]);
+      
+      document.getElementById('petunjukKlik').style.opacity = '0';
+      siapLanjut = false;
+
+      if (indeksParagraf < data.pesan.length - 1) {
+        indeksParagraf++;
+        jalankanCerita(); 
+      } else {
+        const kartu = document.querySelector('.bungkus-kartu');
+        kartu.style.transform = 'scale(0.98) translateY(1vmin)';
+        
+        setTimeout(() => {
+          indeksCerita++;
+          indeksParagraf = 0; 
+          jalankanCerita();
+          kartu.style.transform = 'scale(1) translateY(0)';
+        }, 150);
+      }
+    });
+
+    window.onload = () => {
+      setTimeout(() => jalankanCerita(), 400); 
+    };
+
+    const kursorMouse = document.getElementById('kursor-mouse');
+    if (window.matchMedia("(pointer: fine)").matches && kursorMouse) {
+      document.addEventListener('mousemove', (e) => {
+        kursorMouse.style.left = e.clientX + 'px';
+        kursorMouse.style.top = e.clientY + 'px';
+        const bungkusAktif = document.querySelector('.bungkus-kartu');
+        if (!bungkusAktif) return;
+        const x = (window.innerWidth / 2 - e.pageX) / 80;
+        const y = (window.innerHeight / 2 - e.pageY) / 80;
+        bungkusAktif.style.transform = `rotateY(${x}deg) rotateX(${y}deg)`;
+      });
+      document.addEventListener('mouseleave', () => {
+        const bungkusAktif = document.querySelector('.bungkus-kartu');
+        if (bungkusAktif) bungkusAktif.style.transform = `rotateY(0deg) rotateX(0deg)`;
+      });
+    }
+  </script>
+</body>
+</html>
