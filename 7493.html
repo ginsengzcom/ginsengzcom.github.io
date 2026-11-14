@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, shrink-to-fit=no">
+  <title>7493</title>
+  
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;700;800&display=swap" rel="stylesheet">
+  
+  <style>
+    :root {
+      --latar-kertas: #f4f4f5; 
+      --teks-tinta: #18181b; 
+      --abu-abu: #a1a1aa; 
+      --garis-buku: rgba(0, 0, 0, 0.08);
+    }
+
+    * { 
+      margin: 0; 
+      padding: 0; 
+      box-sizing: border-box; 
+      -webkit-tap-highlight-color: transparent;
+      -webkit-touch-callout: none;
+      -webkit-user-select: none;
+      user-select: none;
+    }
+
+    html, body {
+      width: 100vw;
+      height: 100dvh;
+      overflow: hidden;
+      background: var(--latar-kertas);
+      touch-action: pan-y; 
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      color: var(--teks-tinta);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      perspective: 1000px; 
+      cursor: pointer; 
+    }
+
+    .tekstur-kertas {
+      position: fixed;
+      inset: 0;
+      z-index: 1;
+      opacity: 0.4;
+      pointer-events: none;
+      background: url('data:image/svg+xml;utf8,%3Csvg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"%3E%3Cfilter id="noise"%3E%3CfeTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="3" stitchTiles="stitch"/%3E%3C/filter%3E%3Crect width="100%25" height="100%25" filter="url(%23noise)"/%3E%3C/svg%3E');
+      mix-blend-mode: multiply;
+    }
+
+    @media (pointer: fine) {
+      body { cursor: none; }
+      .kursor-sorot {
+        position: fixed;
+        width: 3.5vmin; height: 3.5vmin;
+        background: rgba(0, 0, 0, 0.1);
+        border: 1.5px solid var(--teks-tinta);
+        border-radius: 50%;
+        pointer-events: none;
+        z-index: 9999;
+        transform: translate(-50%, -50%);
+        transition: width 0.2s, height 0.2s;
+        display: block;
+      }
+    }
+    @media (pointer: coarse) { .kursor-sorot { display: none; } }
+
+    /* LAYAR PEMBUKA AMPLOP */
+    .layar-amplop {
+      position: fixed;
+      inset: 0;
+      z-index: 20;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      background: var(--latar-kertas);
+      transition: opacity 0.6s ease, transform 0.6s cubic-bezier(0.2, 1, 0.3, 1);
+    }
+
+    .layar-amplop.sembunyi {
+      opacity: 0;
+      transform: scale(1.15);
+      pointer-events: none;
+    }
+
+    .amplop-besar {
+      position: relative;
+      width: 88vmin;
+      height: 58vmin;
+      background: #ffffff;
+      border: 2px solid var(--teks-tinta);
+      border-radius: 3vmin;
+      box-shadow: 1.5vmin 1.5vmin 0 var(--teks-tinta);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      overflow: hidden;
+      animation: mengambang 2.5s ease-in-out infinite;
+    }
+
+    .amplop-besar svg {
+      width: 100%;
+      height: 100%;
+    }
+
+    .segel-hati {
+      position: absolute;
+      width: 14vmin;
+      height: 14vmin;
+      background: #ffffff;
+      border: 2px solid var(--teks-tinta);
+      border-radius: 50%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 7vmin;
+      box-shadow: 0.6vmin 0.6vmin 0 var(--teks-tinta);
+      animation: detak 1.2s infinite alternate;
+    }
+
+    .teks-amplop {
+      margin-top: 5vmin;
+      font-size: 3.5vmin;
+      font-weight: 800;
+      color: var(--teks-tinta);
+      letter-spacing: 0.5px;
+      animation: pulse 1.5s infinite;
+    }
+
+    @keyframes mengambang {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-1.5vmin); }
+    }
+
+    @keyframes detak {
+      0% { transform: scale(0.95); }
+      100% { transform: scale(1.15); }
+    }
+
+    /* LAYAR UTAMA MULTI GAMBAR */
+    .layar {
+      position: absolute; 
+      top: 0; left: 0; width: 100vw; height: 100dvh;
+      display: flex; 
+      flex-direction: column; 
+      justify-content: center; 
+      align-items: center;
+      z-index: 10;
+      opacity: 0;
+      transform: scale(0.92);
+      transition: opacity 0.6s ease 0.2s, transform 0.6s cubic-bezier(0.2, 1, 0.3, 1) 0.2s;
+      pointer-events: none;
+    }
+
+    .layar.tampil {
+      opacity: 1;
+      transform: scale(1);
+      pointer-events: auto;
+    }
+
+    .bungkus-kartu {
+      position: relative; 
+      width: 88vmin; 
+      transition: transform 0.4s ease-out;
+    }
+
+    .kartu-gambar {
+      position: relative; 
+      background: #ffffff; 
+      border: 2px solid var(--teks-tinta); 
+      border-radius: 3vmin; 
+      padding: 3.5vmin 3.5vmin 4vmin;
+      box-shadow: 1.5vmin 1.5vmin 0 var(--teks-tinta); 
+      width: 100%;
+      display: flex; 
+      flex-direction: column; 
+      align-items: center; 
+      justify-content: center;
+      contain: paint layout; 
+    }
+
+    /* INDIKATOR PROGRESS FOTO */
+    .indikator-bar {
+      display: flex;
+      gap: 1.2vmin;
+      width: 100%;
+      margin-bottom: 2.5vmin;
+    }
+
+    .bar-item {
+      flex: 1;
+      height: 0.9vmin;
+      background: var(--latar-kertas);
+      border: 1.5px solid var(--teks-tinta);
+      border-radius: 1vmin;
+      transition: background 0.3s ease;
+    }
+
+    .bar-item.aktif {
+      background: var(--teks-tinta);
+    }
+
+    /* FRAME FOTO UTUH TANPA TERPOTONG */
+    .bingkai-foto {
+      width: 100%;
+      min-height: 36vmin;
+      max-height: 55dvh;
+      padding: 1.5vmin;
+      background-color: var(--latar-kertas);
+      background-image: radial-gradient(var(--garis-buku) 1.5px, transparent 1.5px);
+      background-size: 2.5vmin 2.5vmin;
+      border: 2px solid var(--teks-tinta);
+      border-radius: 2vmin;
+      overflow: hidden;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin-bottom: 2.8vmin;
+      box-shadow: 0.7vmin 0.7vmin 0 var(--teks-tinta);
+    }
+
+    .bingkai-foto img {
+      width: 100%;
+      height: auto;
+      max-height: 51dvh;
+      object-fit: contain;
+      border-radius: 1.2vmin;
+      display: block;
+      transition: opacity 0.25s ease, transform 0.25s cubic-bezier(0.2, 1, 0.3, 1);
+    }
+
+    .bingkai-foto img.ganti {
+      opacity: 0;
+      transform: scale(0.95);
+    }
+
+    .caption-foto {
+      width: 100%;
+      text-align: center;
+      font-size: 3.8vmin;
+      font-weight: 700;
+      color: var(--teks-tinta);
+      line-height: 1.4;
+      min-height: 5.5vmin;
+      margin-bottom: 2vmin;
+      transition: opacity 0.25s ease;
+    }
+
+    .petunjuk-klik {
+      width: 100%;
+      text-align: center;
+      font-size: 2.8vmin;
+      color: var(--abu-abu);
+      font-weight: 700;
+      animation: pulse 1.5s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="kursor-sorot" id="kursor-mouse"></div>
+  <div class="tekstur-kertas"></div>
+  
+  <audio id="musik-latar" src="https://feeldreampic.github.io/audio/nightchanges.mp3" preload="auto" loop></audio>
+
+  <!-- LAYAR PEMBUKA AMPLOP -->
+  <div class="layar-amplop" id="layarAmplop">
+    <div class="amplop-besar">
+      <svg viewBox="0 0 300 200" preserveAspectRatio="none">
+        <polyline points="0,200 150,95 300,200" fill="none" stroke="#18181b" stroke-width="2" vector-effect="non-scaling-stroke" stroke-linejoin="round"/>
+        <polyline points="0,0 150,115 300,0" fill="#f4f4f5" stroke="#18181b" stroke-width="2" vector-effect="non-scaling-stroke" stroke-linejoin="round"/>
+      </svg>
+      <div class="segel-hati">💌</div>
+    </div>
+    <div class="teks-amplop">Ketuk amplop untuk membuka</div>
+  </div>
+
+  <!-- LAYAR MULTI GAMBAR -->
+  <div class="layar" id="layarUtama">
+    <div class="bungkus-kartu">
+      <div class="kartu-gambar">
+        <div class="indikator-bar" id="indikatorBar"></div>
+        <div class="bingkai-foto">
+          <img id="fotoUtama" src="" alt="Foto Ekspresi">
+        </div>
+        <div class="caption-foto" id="captionFoto"></div>
+        <div class="petunjuk-klik" id="petunjukKlik">(Ketuk layar untuk lanjut)</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const dataGambar = [
+      {
+        src: "https://raw.githubusercontent.com/ginsengzcom/ginsengzcom.github.io/refs/heads/main/sayangpekagaksih.webp",
+        caption: "sayang peka gak sih 🥺👉👈"
+      },
+      {
+        src: "https://raw.githubusercontent.com/ginsengzcom/ginsengzcom.github.io/refs/heads/main/akucumanpengendimanja.webp",
+        caption: "aku cuman pengen dimanja 🥰🫂"
+      },
+      {
+        src: "https://raw.githubusercontent.com/ginsengzcom/ginsengzcom.github.io/refs/heads/main/bukandiabaikansayang.webp",
+        caption: "bukan diabaikan sayang 😢💔"
+      },
+      {
+        src: "https://raw.githubusercontent.com/ginsengzcom/ginsengzcom.github.io/refs/heads/main/sayangakutuhgakegois.webp",
+        caption: "sayang aku tuh gak egois 🥹🙏"
+      },
+      {
+        src: "https://raw.githubusercontent.com/ginsengzcom/ginsengzcom.github.io/refs/heads/main/sayangkangenmauketemu.webp",
+        caption: "sayang kangen mau ketemu 😭💖"
+      },
+      {
+        src: "https://raw.githubusercontent.com/ginsengzcom/ginsengzcom.github.io/refs/heads/main/ayokitajalansayang.webp",
+        caption: "ayo kita jalan sayang ✨🛵💨"
+      },
+      {
+        src: "https://raw.githubusercontent.com/ginsengzcom/ginsengzcom.github.io/refs/heads/main/gasmeluncuremuach.webp",
+        caption: "gas meluncur emuach 😘💋🚀"
+      },
+      {
+        src: "https://raw.githubusercontent.com/ginsengzcom/ginsengzcom.github.io/refs/heads/main/nantimaujajanbuanyankbangetyahsayang.webp",
+        caption: "nanti mau jajan buanyank banget yah sayang (•_<)"
+      },
+      {
+        src: "https://raw.githubusercontent.com/ginsengzcom/ginsengzcom.github.io/refs/heads/main/heheh.webp",
+        caption: "heheh🥹"
+      }
+    ];
+
+    // PRELOAD & DECODE SEMUA GAMBAR DI LATAR BELAKANG SEJAK HALAMAN DIBUKA
+    const cacheGambar = [];
+    function preloadSemuaGambar() {
+      dataGambar.forEach((item, index) => {
+        const img = new Image();
+        img.src = item.src;
+        // Decode di memori agar saat ganti foto benar-benar 0ms tanpa kedip
+        if (img.decode) {
+          img.decode().catch(() => {});
+        }
+        cacheGambar[index] = img;
+      });
+    }
+    preloadSemuaGambar();
+
+    let amplopTerbuka = false;
+    let indeksFoto = 0;
+    let sedangTransisi = false;
+
+    const fotoEl = document.getElementById('fotoUtama');
+    const captionEl = document.getElementById('captionFoto');
+    const indikatorEl = document.getElementById('indikatorBar');
+    const petunjukEl = document.getElementById('petunjukKlik');
+
+    function buatIndikator() {
+      indikatorEl.innerHTML = '';
+      dataGambar.forEach((_, idx) => {
+        const bar = document.createElement('div');
+        bar.className = 'bar-item' + (idx === 0 ? ' aktif' : '');
+        indikatorEl.appendChild(bar);
+      });
+    }
+
+    function tampilkanFoto(index) {
+      sedangTransisi = true;
+      fotoEl.classList.add('ganti');
+      captionEl.style.opacity = '0';
+
+      const bars = indikatorEl.querySelectorAll('.bar-item');
+      bars.forEach((b, i) => {
+        b.classList.toggle('aktif', i <= index);
+      });
+
+      setTimeout(() => {
+        fotoEl.src = dataGambar[index].src;
+        captionEl.textContent = dataGambar[index].caption;
+
+        if (index === dataGambar.length - 1) {
+          petunjukEl.textContent = "(Ketuk untuk ulang dari awal ↻)";
+        } else {
+          petunjukEl.textContent = "(Ketuk layar untuk lanjut)";
+        }
+
+        // Langsung tampilkan jika sudah terunduh di cache, atau tunggu onload jika koneksi lambat
+        if (fotoEl.complete) {
+          fotoEl.classList.remove('ganti');
+          captionEl.style.opacity = '1';
+          sedangTransisi = false;
+        } else {
+          fotoEl.onload = () => {
+            fotoEl.classList.remove('ganti');
+            captionEl.style.opacity = '1';
+            sedangTransisi = false;
+          };
+          fotoEl.onerror = () => {
+            fotoEl.classList.remove('ganti');
+            captionEl.style.opacity = '1';
+            sedangTransisi = false;
+          };
+        }
+      }, 200);
+    }
+
+    // Event buka amplop
+    document.getElementById('layarAmplop').addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (amplopTerbuka) return;
+      amplopTerbuka = true;
+
+      const musik = document.getElementById('musik-latar');
+      if (musik && musik.paused) {
+        musik.play().catch(() => {});
+      }
+
+      if (navigator.vibrate) navigator.vibrate([40, 30, 40]);
+
+      buatIndikator();
+      fotoEl.src = dataGambar[0].src;
+      captionEl.textContent = dataGambar[0].caption;
+
+      document.getElementById('layarAmplop').classList.add('sembunyi');
+      document.getElementById('layarUtama').classList.add('tampil');
+    });
+
+    // Event ganti foto
+    document.body.addEventListener('click', () => {
+      if (!amplopTerbuka || sedangTransisi) return;
+
+      if (navigator.vibrate) navigator.vibrate(30);
+
+      indeksFoto = (indeksFoto + 1) % dataGambar.length;
+      tampilkanFoto(indeksFoto);
+    });
+
+    // Efek 3D kartu di desktop
+    const kursorMouse = document.getElementById('kursor-mouse');
+    if (window.matchMedia("(pointer: fine)").matches && kursorMouse) {
+      document.addEventListener('mousemove', (e) => {
+        kursorMouse.style.left = e.clientX + 'px';
+        kursorMouse.style.top = e.clientY + 'px';
+        const bungkusAktif = document.querySelector('.bungkus-kartu');
+        if (!bungkusAktif) return;
+        const x = (window.innerWidth / 2 - e.pageX) / 80;
+        const y = (window.innerHeight / 2 - e.pageY) / 80;
+        bungkusAktif.style.transform = `rotateY(${x}deg) rotateX(${y}deg)`;
+      });
+      document.addEventListener('mouseleave', () => {
+        const bungkusAktif = document.querySelector('.bungkus-kartu');
+        if (bungkusAktif) bungkusAktif.style.transform = `rotateY(0deg) rotateX(0deg)`;
+      });
+    }
+  </script>
+</body>
+</html>
