@@ -1,0 +1,1176 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, shrink-to-fit=no">
+  <title>Untuk Kamu 💌</title>
+  
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;700;800&family=Playfair+Display:ital,wght@0,700;1,700&display=swap" rel="stylesheet">
+  
+  <style>
+    :root {
+      --latar-kertas: #fff1f2; 
+      --teks-tinta: #18181b; 
+      --pink-cerah: #fb7185;
+      --merah-hati: #f43f5e;
+      --emas-mewah: #f59e0b;
+      --emas-terang: #fde68a;
+      --abu-padam: #52525b;
+      --abu-teks: #71717a;
+    }
+
+    * { 
+      margin: 0; 
+      padding: 0; 
+      box-sizing: border-box; 
+      -webkit-tap-highlight-color: transparent;
+      -webkit-touch-callout: none;
+      -webkit-user-select: none;
+      user-select: none;
+    }
+
+    html, body {
+      width: 100vw;
+      height: 100dvh;
+      overflow: hidden;
+      background: var(--latar-kertas);
+      touch-action: manipulation;
+      transition: background 1s ease;
+    }
+
+    body.mode-padam {
+      background: #18181b;
+    }
+
+    /* Mode Latar Mewah Saat Kejutan Diterima */
+    body.mode-mewah {
+      background: radial-gradient(circle at 50% 35%, #fffbeb 0%, #ffe4e6 42%, #fecdd3 75%, #fda4af 100%);
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      color: var(--teks-tinta);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      perspective: 1000px;
+    }
+
+    .tekstur-kertas {
+      position: fixed;
+      inset: 0;
+      z-index: 1;
+      opacity: 0.4;
+      pointer-events: none;
+      background: url('data:image/svg+xml;utf8,%3Csvg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"%3E%3Cfilter id="noise"%3E%3CfeTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="3" stitchTiles="stitch"/%3E%3C/filter%3E%3Crect width="100%25" height="100%25" filter="url(%23noise)"/%3E%3C/svg%3E');
+      mix-blend-mode: multiply;
+    }
+
+    #kanvas-konfeti {
+      position: fixed;
+      inset: 0;
+      z-index: 50;
+      pointer-events: none;
+    }
+
+    /* Kilatan cahaya putih/emas */
+    .kilatan-ledakan {
+      position: fixed;
+      inset: 0;
+      background: #ffffff;
+      z-index: 60;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.6s ease-out;
+    }
+
+    .kilatan-ledakan.aktif {
+      opacity: 0.95;
+      transition: none;
+    }
+
+    @media (pointer: fine) {
+      body { cursor: none; }
+      .kursor-sorot {
+        position: fixed;
+        width: 3.5vmin; height: 3.5vmin;
+        background: rgba(244, 63, 94, 0.2);
+        border: 2px solid var(--teks-tinta);
+        border-radius: 50%;
+        pointer-events: none;
+        z-index: 9999;
+        transform: translate(-50%, -50%);
+        display: block;
+      }
+    }
+    @media (pointer: coarse) { .kursor-sorot { display: none; } }
+
+    /* ================= LAYAR PEMBUKA AMPLOP ================= */
+    .layar-amplop {
+      position: fixed;
+      inset: 0;
+      z-index: 20;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      background: var(--latar-kertas);
+      transition: opacity 0.6s ease, transform 0.6s cubic-bezier(0.2, 1, 0.3, 1);
+      padding: 4vmin;
+    }
+
+    .layar-amplop.sembunyi {
+      opacity: 0;
+      transform: scale(1.18);
+      pointer-events: none;
+    }
+
+    .amplop-besar {
+      position: relative;
+      width: 86vmin;
+      height: 56vmin;
+      background: #ffffff;
+      border: 2.5px solid var(--teks-tinta);
+      border-radius: 3vmin;
+      box-shadow: 1.5vmin 1.5vmin 0 var(--teks-tinta);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      overflow: hidden;
+      cursor: pointer;
+      animation: mengambang 2.5s ease-in-out infinite;
+    }
+
+    .amplop-besar svg {
+      width: 100%;
+      height: 100%;
+    }
+
+    .segel-hati {
+      position: absolute;
+      width: 15vmin;
+      height: 15vmin;
+      background: var(--pink-cerah);
+      border: 2.5px solid var(--teks-tinta);
+      border-radius: 50%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 7vmin;
+      box-shadow: 0.6vmin 0.6vmin 0 var(--teks-tinta);
+      animation: detak 1.1s infinite alternate;
+    }
+
+    .teks-amplop {
+      margin-top: 5vmin;
+      font-size: 3.5vmin;
+      font-weight: 800;
+      color: var(--teks-tinta);
+      animation: pulse 1.5s infinite;
+    }
+
+    @keyframes mengambang {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-1.5vmin); }
+    }
+
+    @keyframes detak {
+      0% { transform: scale(0.95); }
+      100% { transform: scale(1.14); }
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+    }
+
+    /* ================= LAYAR SURAT BERBENTUK HATI ================= */
+    .layar-hati {
+      position: absolute;
+      inset: 0;
+      z-index: 10;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      opacity: 0;
+      transform: scale(0.85);
+      transition: opacity 0.7s ease 0.2s, transform 0.7s cubic-bezier(0.2, 1, 0.3, 1) 0.2s;
+      pointer-events: none;
+      padding: 2vmin;
+    }
+
+    .layar-hati.tampil {
+      opacity: 1;
+      transform: scale(1);
+      pointer-events: auto;
+    }
+
+    .wadah-hati {
+      position: relative;
+      width: 94vmin;
+      height: 88vmin;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      transition: transform 0.6s ease, filter 0.8s ease, opacity 0.6s ease;
+      cursor: pointer;
+    }
+
+    .wadah-hati.berdetak {
+      animation: detakHatiBesar 2.2s ease-in-out infinite;
+    }
+
+    .wadah-hati.bersinar {
+      animation: detakBahagia 0.85s ease-in-out infinite alternate;
+      filter: drop-shadow(0 0 3.5vmin rgba(244, 63, 94, 0.95)) drop-shadow(0 0 8vmin rgba(251, 191, 36, 0.95));
+    }
+
+    .wadah-hati.retak {
+      animation: getarPatah 0.45s ease;
+      filter: drop-shadow(0 0 0 transparent);
+    }
+
+    .wadah-hati.kritis {
+      animation: getarKritis 0.1s infinite;
+    }
+
+    .wadah-hati.meledak {
+      opacity: 0;
+      transform: scale(1.6);
+      pointer-events: none;
+    }
+
+    .wadah-hati.mekar-mewah {
+      opacity: 0;
+      transform: scale(1.8);
+      pointer-events: none;
+    }
+
+    @keyframes detakHatiBesar {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.025); }
+    }
+
+    @keyframes detakBahagia {
+      0% { transform: scale(1.02); }
+      100% { transform: scale(1.07); }
+    }
+
+    @keyframes getarPatah {
+      0%, 100% { transform: translateX(0) rotate(0deg); }
+      20% { transform: translateX(-10px) rotate(-3deg); }
+      40% { transform: translateX(10px) rotate(3deg); }
+      60% { transform: translateX(-7px) rotate(-2deg); }
+      80% { transform: translateX(7px) rotate(2deg); }
+    }
+
+    @keyframes getarKritis {
+      0% { transform: translate(-4px, 3px) rotate(-1.5deg); }
+      50% { transform: translate(4px, -3px) rotate(1.5deg); }
+      100% { transform: translate(-3px, -3px) rotate(0deg); }
+    }
+
+    /* SVG Bentuk Hati */
+    .svg-hati {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      overflow: visible;
+    }
+
+    .path-bayangan {
+      fill: var(--teks-tinta);
+      transform: translate(1.4vmin, 1.4vmin);
+    }
+
+    .path-utama {
+      fill: #ffffff;
+      stroke: var(--teks-tinta);
+      stroke-width: 3;
+      stroke-linejoin: round;
+      transition: fill 0.8s ease, stroke 0.8s ease;
+    }
+
+    .wadah-hati.bersinar .path-utama {
+      fill: #fff1f2;
+      stroke: #e11d48;
+    }
+
+    .wadah-hati.retak .path-utama {
+      fill: #27272a;
+      stroke: #09090b;
+    }
+
+    /* Garis Retakan di Tengah Hati */
+    .garis-retak {
+      fill: none;
+      stroke: #09090b;
+      stroke-width: 3.8;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      stroke-dasharray: 260;
+      stroke-dashoffset: 260;
+      opacity: 0;
+      transition: stroke-dashoffset 0.65s ease-out, opacity 0.2s ease;
+    }
+
+    .wadah-hati.retak .garis-retak {
+      opacity: 1;
+      stroke-dashoffset: 0;
+    }
+
+    /* Area Teks di Dalam Hati */
+    .isi-dalam-hati {
+      position: relative;
+      z-index: 5;
+      width: 56%;
+      margin-top: -4vmin;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+    }
+
+    .ikon-atas-hati {
+      font-size: 5.5vmin;
+      margin-bottom: 1.5vmin;
+      transition: transform 0.3s ease;
+    }
+
+    .teks-surat {
+      font-size: 3.3vmin;
+      font-weight: 700;
+      line-height: 1.48;
+      color: var(--teks-tinta);
+      min-height: 15vmin;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      transition: color 0.8s ease;
+    }
+
+    .wadah-hati.retak .teks-surat {
+      color: #d4d4d8;
+    }
+
+    .angka-mundur {
+      margin-top: 1.5vmin;
+      font-size: 6vmin;
+      font-weight: 800;
+      color: var(--merah-hati);
+      animation: detakAngka 0.8s infinite;
+    }
+
+    .angka-mundur-indah {
+      margin-top: 1.5vmin;
+      font-size: 6.5vmin;
+      font-weight: 800;
+      background: linear-gradient(135deg, #e11d48, #d97706);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      filter: drop-shadow(0 0.4vmin 1vmin rgba(245, 158, 11, 0.4));
+      animation: detakAngka 0.85s infinite;
+    }
+
+    @keyframes detakAngka {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.25); }
+    }
+
+    .petunjuk-ketuk {
+      margin-top: 2vmin;
+      font-size: 2.5vmin;
+      font-weight: 800;
+      color: var(--merah-hati);
+      animation: pulse 1.4s infinite;
+    }
+
+    /* ================= TOMBOL PILIHAN IYA / TIDAK ================= */
+    .wadah-pilihan {
+      display: none;
+      flex-direction: column;
+      gap: 1.6vmin;
+      width: 100%;
+      margin-top: 2vmin;
+      z-index: 10;
+    }
+
+    .wadah-pilihan.muncul {
+      display: flex;
+      animation: munculTombol 0.4s cubic-bezier(0.2, 1, 0.3, 1);
+    }
+
+    @keyframes munculTombol {
+      from { opacity: 0; transform: translateY(1.5vmin) scale(0.95); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    .btn-pilihan {
+      width: 100%;
+      padding: 1.8vmin 2vmin;
+      border: 2.2px solid var(--teks-tinta);
+      border-radius: 99px;
+      font-family: inherit;
+      font-size: 2.8vmin;
+      font-weight: 800;
+      cursor: pointer;
+      transition: transform 0.12s ease, box-shadow 0.12s ease;
+    }
+
+    .btn-pilihan:active {
+      transform: translate(0.3vmin, 0.3vmin);
+    }
+
+    .btn-terima {
+      background: var(--merah-hati);
+      color: #ffffff;
+      box-shadow: 0.5vmin 0.5vmin 0 var(--teks-tinta);
+    }
+
+    .btn-tolak {
+      background: #ffffff;
+      color: var(--teks-tinta);
+      box-shadow: 0.5vmin 0.5vmin 0 var(--teks-tinta);
+    }
+
+    /* Pesan Akhir Setelah Meledak */
+    .pesan-akhir-ledakan {
+      position: absolute;
+      text-align: center;
+      color: #71717a;
+      opacity: 0;
+      transform: scale(0.9);
+      transition: opacity 0.8s ease 0.4s, transform 0.8s ease 0.4s;
+      pointer-events: none;
+      padding: 4vmin;
+    }
+
+    .pesan-akhir-ledakan.tampil {
+      opacity: 1;
+      transform: scale(1);
+    }
+
+    .pesan-akhir-ledakan h3 {
+      font-size: 5vmin;
+      font-weight: 800;
+      color: #a1a1aa;
+      margin-bottom: 1.5vmin;
+    }
+
+    .pesan-akhir-ledakan p {
+      font-size: 3.2vmin;
+      font-weight: 600;
+    }
+
+    /* ================= KEJUTAN MEWAH SAAT DITERIMA ================= */
+    .layar-mewah {
+      position: fixed;
+      inset: 0;
+      z-index: 35;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.9s ease;
+      padding: 4vmin;
+    }
+
+    .layar-mewah.tampil {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    /* Bingkai Emas Ganda di Sekeliling Layar */
+    .bingkai-emas-luar {
+      position: fixed;
+      inset: 2.2vmin;
+      border: 2.5px solid #d97706;
+      border-radius: 3vmin;
+      pointer-events: none;
+      box-shadow: inset 0 0 4vmin rgba(251, 191, 36, 0.35), 0 0 2vmin rgba(251, 191, 36, 0.4);
+      z-index: 36;
+    }
+
+    .bingkai-emas-dalam {
+      position: fixed;
+      inset: 3.4vmin;
+      border: 1px dashed #f59e0b;
+      border-radius: 2.2vmin;
+      pointer-events: none;
+      z-index: 36;
+    }
+
+    /* Ornamen Sudut Mewah */
+    .ornamen-sudut {
+      position: fixed;
+      font-size: 5vmin;
+      z-index: 38;
+      pointer-events: none;
+      animation: kilauOrnamen 2s infinite alternate ease-in-out;
+    }
+
+    @keyframes kilauOrnamen {
+      0% { transform: scale(0.9) rotate(-6deg); filter: drop-shadow(0 0 0.5vmin gold); }
+      100% { transform: scale(1.15) rotate(6deg); filter: drop-shadow(0 0 1.8vmin #f59e0b); }
+    }
+
+    /* Kartu Sertifikat Cinta Mewah */
+    .kartu-mewah {
+      position: relative;
+      z-index: 40;
+      width: 88vmin;
+      background: linear-gradient(160deg, #ffffff 0%, #fffbeb 55%, #fff1f2 100%);
+      border: 3px solid #d97706;
+      border-radius: 3.5vmin;
+      padding: 4.5vmin 4vmin;
+      text-align: center;
+      box-shadow: 0 2vmin 5vmin rgba(225, 29, 72, 0.22), 1.2vmin 1.2vmin 0 #b45309;
+      transform: scale(0.85) translateY(3vmin);
+      transition: transform 0.8s cubic-bezier(0.2, 1, 0.3, 1);
+      overflow: hidden;
+    }
+
+    .layar-mewah.tampil .kartu-mewah {
+      transform: scale(1) translateY(0);
+    }
+
+    /* Efek Kilau Cahaya Menyapu Kartu */
+    .kartu-mewah::after {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -60%;
+      width: 45%;
+      height: 200%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.85), transparent);
+      transform: rotate(25deg);
+      animation: kilapSapu 3.2s infinite ease-in-out;
+      pointer-events: none;
+    }
+
+    @keyframes kilapSapu {
+      0% { left: -60%; }
+      55%, 100% { left: 140%; }
+    }
+
+    .mahkota-mewah {
+      font-size: 7.5vmin;
+      margin-bottom: 1vmin;
+      display: inline-block;
+      animation: mengambang 2s ease-in-out infinite;
+      filter: drop-shadow(0 0.6vmin 1vmin rgba(245, 158, 11, 0.45));
+    }
+
+    .pita-resmi {
+      display: inline-block;
+      background: linear-gradient(90deg, #f59e0b, #fbbf24, #f59e0b);
+      color: #451a03;
+      font-size: 2.3vmin;
+      font-weight: 800;
+      letter-spacing: 1.5px;
+      padding: 0.7vmin 2.8vmin;
+      border-radius: 99px;
+      border: 1.5px solid #92400e;
+      margin-bottom: 2vmin;
+      text-transform: uppercase;
+    }
+
+    .judul-mewah {
+      font-family: 'Playfair Display', serif;
+      font-size: 5.6vmin;
+      font-weight: 700;
+      color: #9f1239;
+      line-height: 1.15;
+      margin-bottom: 1.5vmin;
+    }
+
+    .garis-pemisah-emas {
+      width: 60%;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, #d97706, transparent);
+      margin: 1.5vmin auto 2vmin;
+    }
+
+    .isi-ucapan-mewah {
+      font-size: 3.1vmin;
+      font-weight: 600;
+      line-height: 1.55;
+      color: #4c0519;
+      margin-bottom: 2.5vmin;
+    }
+
+    .kotak-tanggal-resmi {
+      background: #fffbeb;
+      border: 1.5px solid #f59e0b;
+      border-radius: 1.8vmin;
+      padding: 1.6vmin 2.5vmin;
+      margin-bottom: 2.5vmin;
+      font-size: 2.6vmin;
+      font-weight: 800;
+      color: #92400e;
+    }
+
+    .btn-rayakan-mewah {
+      width: 100%;
+      background: linear-gradient(135deg, #e11d48, #be123c);
+      color: #ffffff;
+      border: 2px solid #881337;
+      border-radius: 99px;
+      padding: 2vmin 3vmin;
+      font-family: inherit;
+      font-size: 3vmin;
+      font-weight: 800;
+      cursor: pointer;
+      box-shadow: 0 0.7vmin 0 #881337;
+      transition: transform 0.12s ease;
+    }
+
+    .btn-rayakan-mewah:active {
+      transform: translateY(0.4vmin);
+    }
+
+    /* Kelopak Mawar & Hati Melayang di Latar Mewah */
+    .dekorasi-melayang {
+      position: fixed;
+      top: -8vmin;
+      font-size: 4vmin;
+      z-index: 37;
+      pointer-events: none;
+      animation: jatuhRomantis linear forwards;
+    }
+
+    @keyframes jatuhRomantis {
+      0% { transform: translateY(0) rotate(0deg) translateX(0); opacity: 1; }
+      50% { transform: translateY(55dvh) rotate(180deg) translateX(4vmin); }
+      100% { transform: translateY(112dvh) rotate(360deg) translateX(-4vmin); opacity: 0.85; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="kursor-sorot" id="kursor-mouse"></div>
+  <div class="tekstur-kertas"></div>
+  <div class="kilatan-ledakan" id="kilatanLedakan"></div>
+  <canvas id="kanvas-konfeti"></canvas>
+
+  <audio id="musik-latar" src="https://feeldreampic.github.io/audio/nightchanges.mp3" preload="auto" loop></audio>
+
+  <!-- LAYAR 1: AMPLOP PEMBUKA -->
+  <div class="layar-amplop" id="layarAmplop">
+    <div class="amplop-besar" id="amplopBox">
+      <svg viewBox="0 0 300 200" preserveAspectRatio="none">
+        <polyline points="0,200 150,95 300,200" fill="none" stroke="#18181b" stroke-width="2.5" vector-effect="non-scaling-stroke" stroke-linejoin="round"/>
+        <polyline points="0,0 150,115 300,0" fill="#ffe4e6" stroke="#18181b" stroke-width="2.5" vector-effect="non-scaling-stroke" stroke-linejoin="round"/>
+      </svg>
+      <div class="segel-hati">💌</div>
+    </div>
+    <div class="teks-amplop">Ketuk amplop untuk membuka isi hatiku</div>
+  </div>
+
+  <!-- LAYAR 2: KARTU BERBENTUK HATI -->
+  <div class="layar-hati" id="layarHati">
+    <div class="wadah-hati berdetak" id="wadahHati">
+      
+      <svg class="svg-hati" viewBox="0 0 200 185">
+        <path class="path-bayangan" d="M100 172 C100 172 14 118 14 60 C14 28 38 10 64 10 C82 10 95 21 100 32 C105 21 118 10 136 10 C162 10 186 28 186 60 C186 118 100 172 100 172 Z"/>
+        <path class="path-utama" d="M100 172 C100 172 14 118 14 60 C14 28 38 10 64 10 C82 10 95 21 100 32 C105 21 118 10 136 10 C162 10 186 28 186 60 C186 118 100 172 100 172 Z"/>
+        <polyline class="garis-retak" points="100,32 91,56 108,76 92,102 107,128 96,150 100,172"/>
+      </svg>
+
+      <div class="isi-dalam-hati">
+        <div class="ikon-atas-hati" id="ikonHati">🥺</div>
+        <div class="teks-surat" id="teksSurat"></div>
+        <div class="petunjuk-ketuk" id="petunjukKetuk">(Ketuk hati untuk lanjut)</div>
+
+        <div class="wadah-pilihan" id="wadahPilihan">
+          <button class="btn-pilihan btn-terima" id="btnTerima">Iya, Aku Mau! 💖</button>
+          <button class="btn-pilihan btn-tolak" id="btnTolak">Maaf, Nggak Dulu 💔</button>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Muncul setelah hati meledak -->
+    <div class="pesan-akhir-ledakan" id="pesanAkhirLedakan">
+      <h3>💥 Hati Telah Hancur Berkeping-keping...</h3>
+      <p>Makasih udah jujur ya. Semoga kamu selalu bahagia. 🥀</p>
+    </div>
+  </div>
+
+  <!-- LAYAR 3: KEJUTAN MEWAH SAAT DITERIMA -->
+  <div class="layar-mewah" id="layarMewah">
+    <div class="bingkai-emas-luar"></div>
+    <div class="bingkai-emas-dalam"></div>
+
+    <div class="ornamen-sudut" style="top: 4.5vmin; left: 4.5vmin;">🌹✨</div>
+    <div class="ornamen-sudut" style="top: 4.5vmin; right: 4.5vmin; animation-delay: 0.4s;">✨🌹</div>
+    <div class="ornamen-sudut" style="bottom: 4.5vmin; left: 4.5vmin; animation-delay: 0.8s;">💎💖</div>
+    <div class="ornamen-sudut" style="bottom: 4.5vmin; right: 4.5vmin; animation-delay: 1.2s;">💖💎</div>
+
+    <div class="kartu-mewah">
+      <div class="mahkota-mewah">👑</div><br>
+      <div class="pita-resmi">✨ Official Love Announcement ✨</div>
+      <h2 class="judul-mewah">We Are Officially Together!</h2>
+      <div class="garis-pemisah-emas"></div>
+      <p class="isi-ucapan-mewah">
+        Terima kasih sudah memilih untuk berjalan bareng aku. Mulai detik ini, bahagiamu jadi prioritasku, dan aku janji bakal selalu bikin kamu merasa dicintai setiap hari. 💖🥂
+      </p>
+      <div class="kotak-tanggal-resmi" id="tanggalJadian">
+        💍 Resmi Jadian • Hari Ini & Selamanya
+      </div>
+      <button class="btn-rayakan-mewah" id="btnKembangApiMewah">Rayakan Dengan Kembang Api ✨🎆</button>
+    </div>
+  </div>
+
+  <script>
+    // ================= RANGKAIAN KATA NEMBAK CEWEK =================
+    const daftarPesan = [
+      {
+        ikon: "🥺",
+        teks: "Hai kamu... makasih ya udah mau buka surat kecil ini."
+      },
+      {
+        ikon: "🙈",
+        teks: "Sebenernya udah lama aku nyimpen perasaan ini sendirian tiap kali ngobrol sama kamu."
+      },
+      {
+        ikon: "✨",
+        teks: "Entah kenapa, hari-hariku selalu terasa lebih seru dan nyaman kalau ada kamu."
+      },
+      {
+        ikon: "💓",
+        teks: "Aku nggak mau cuma sekadar jadi temen chat kamu aja..."
+      },
+      {
+        ikon: "🌹",
+        teks: "Jadi hari ini aku memberanikan diri buat nanya: Mau nggak kamu jadi pacarku?"
+      }
+    ];
+
+    // ================= EFEK SUARA SINTETIS =================
+    const AudioCtx = window.AudioContext || window.webkitAudioContext;
+    let audioCtx = null;
+
+    function mainkanNada(frekuensi, durasi, tipe = 'sine', volume = 0.14) {
+      if (!audioCtx) audioCtx = new AudioCtx();
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = tipe;
+      osc.frequency.setValueAtTime(frekuensi, audioCtx.currentTime);
+      gain.gain.setValueAtTime(volume, audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + durasi);
+
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      osc.start();
+      osc.stop(audioCtx.currentTime + durasi);
+    }
+
+    function suaraTerima() {
+      const nada = [523.25, 659.25, 783.99, 1046.50, 1318.51];
+      nada.forEach((f, i) => setTimeout(() => mainkanNada(f, 0.4, 'triangle', 0.18), i * 110));
+    }
+
+    function suaraGalaMewah() {
+      const akor = [523.25, 659.25, 783.99, 987.77, 1046.50, 1318.51, 1567.98];
+      akor.forEach((f, i) => setTimeout(() => mainkanNada(f, 0.7, 'sine', 0.16), i * 85));
+    }
+
+    function suaraRetak() {
+      mainkanNada(180, 0.25, 'sawtooth', 0.16);
+      setTimeout(() => mainkanNada(115, 0.45, 'sawtooth', 0.18), 160);
+    }
+
+    function suaraLedakan() {
+      if (!audioCtx) audioCtx = new AudioCtx();
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+
+      const bufferSize = audioCtx.sampleRate * 0.9;
+      const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+      const data = buffer.getChannelData(0);
+      for (let i = 0; i < bufferSize; i++) {
+        data[i] = Math.random() * 2 - 1;
+      }
+
+      const noise = audioCtx.createBufferSource();
+      noise.buffer = buffer;
+
+      const filter = audioCtx.createBiquadFilter();
+      filter.type = 'lowpass';
+      filter.frequency.setValueAtTime(420, audioCtx.currentTime);
+      filter.frequency.exponentialRampToValueAtTime(40, audioCtx.currentTime + 0.85);
+
+      const gain = audioCtx.createGain();
+      gain.gain.setValueAtTime(0.5, audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.9);
+
+      noise.connect(filter);
+      filter.connect(gain);
+      gain.connect(audioCtx.destination);
+      noise.start();
+    }
+
+    // ================= KONFETI HATI, EMAS & SERPIHAN =================
+    const canvas = document.getElementById('kanvas-konfeti');
+    const ctx = canvas.getContext('2d');
+    let partikel = [];
+
+    function resizeCanvas() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+
+    function tembakPartikel(jumlah = 110, mode = 'bahagia', asalX = window.innerWidth / 2, asalY = window.innerHeight / 2) {
+      const warnaBahagia = ['#f43f5e', '#fb7185', '#facc15', '#fda4af', '#ffffff'];
+      const warnaMewah = ['#f59e0b', '#fbbf24', '#fde047', '#f43f5e', '#fb7185', '#ffffff'];
+      const warnaLedakan = ['#27272a', '#3f3f46', '#52525b', '#71717a', '#f43f5e'];
+      
+      let palet = warnaBahagia;
+      if (mode === 'ledakan') palet = warnaLedakan;
+      if (mode === 'mewah') palet = warnaMewah;
+
+      const kecepatan = mode === 'ledakan' ? 28 : (mode === 'mewah' ? 22 : 18);
+
+      for (let i = 0; i < jumlah; i++) {
+        partikel.push({
+          x: asalX,
+          y: asalY,
+          vx: (Math.random() - 0.5) * kecepatan,
+          vy: (Math.random() - 0.72) * kecepatan,
+          ukuran: mode === 'ledakan' ? (Math.random() * 14 + 6) : (Math.random() * 11 + 6),
+          warna: palet[Math.floor(Math.random() * palet.length)],
+          rotasi: Math.random() * 360,
+          vRotasi: (Math.random() - 0.5) * 14,
+          gravitasi: mode === 'ledakan' ? 0.45 : 0.28,
+          bentuk: mode === 'ledakan' ? 'serpihan' : (mode === 'mewah' && Math.random() > 0.5 ? 'bintang' : 'hati')
+        });
+      }
+    }
+
+    function gambarHatiKecil(x, y, size, rotasi, warna) {
+      ctx.save();
+      ctx.translate(x, y);
+      ctx.rotate((rotasi * Math.PI) / 180);
+      ctx.fillStyle = warna;
+      ctx.strokeStyle = '#18181b';
+      ctx.lineWidth = 1.1;
+      ctx.beginPath();
+      const topCurveHeight = size * 0.3;
+      ctx.moveTo(0, topCurveHeight);
+      ctx.bezierCurveTo(0, 0, -size / 2, 0, -size / 2, topCurveHeight);
+      ctx.bezierCurveTo(-size / 2, (size + topCurveHeight) / 2, 0, (size + topCurveHeight) / 1.4, 0, size);
+      ctx.bezierCurveTo(0, (size + topCurveHeight) / 1.4, size / 2, (size + topCurveHeight) / 2, size / 2, topCurveHeight);
+      ctx.bezierCurveTo(size / 2, 0, 0, 0, 0, topCurveHeight);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    function gambarBintangEmas(x, y, size, rotasi, warna) {
+      ctx.save();
+      ctx.translate(x, y);
+      ctx.rotate((rotasi * Math.PI) / 180);
+      ctx.fillStyle = warna;
+      ctx.beginPath();
+      for (let i = 0; i < 4; i++) {
+        ctx.lineTo(0, -size * 0.8);
+        ctx.lineTo(size * 0.22, -size * 0.22);
+        ctx.rotate(Math.PI / 2);
+      }
+      ctx.closePath();
+      ctx.fill();
+      ctx.restore();
+    }
+
+    function gambarSerpihan(x, y, size, rotasi, warna) {
+      ctx.save();
+      ctx.translate(x, y);
+      ctx.rotate((rotasi * Math.PI) / 180);
+      ctx.fillStyle = warna;
+      ctx.strokeStyle = '#09090b';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.moveTo(-size / 2, -size / 3);
+      ctx.lineTo(size / 2, -size / 2);
+      ctx.lineTo(size / 3, size / 2);
+      ctx.lineTo(-size / 2, size / 4);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    function animasiKonfeti() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      partikel.forEach((p, idx) => {
+        p.x += p.vx;
+        p.y += p.vy;
+        p.vy += p.gravitasi;
+        p.rotasi += p.vRotasi;
+
+        if (p.bentuk === 'serpihan') {
+          gambarSerpihan(p.x, p.y, p.ukuran, p.rotasi, p.warna);
+        } else if (p.bentuk === 'bintang') {
+          gambarBintangEmas(p.x, p.y, p.ukuran, p.rotasi, p.warna);
+        } else {
+          gambarHatiKecil(p.x, p.y, p.ukuran, p.rotasi, p.warna);
+        }
+
+        if (p.y > canvas.height + 40) {
+          partikel.splice(idx, 1);
+        }
+      });
+      requestAnimationFrame(animasiKonfeti);
+    }
+    animasiKonfeti();
+
+    // ================= LOGIKA ALUR SURAT =================
+    let amplopTerbuka = false;
+    let indeksPesan = 0;
+    let sedangKetik = false;
+    let sudahMemilih = false;
+
+    const wadahHati = document.getElementById('wadahHati');
+    const ikonHati = document.getElementById('ikonHati');
+    const teksSurat = document.getElementById('teksSurat');
+    const petunjukKetuk = document.getElementById('petunjukKetuk');
+    const wadahPilihan = document.getElementById('wadahPilihan');
+
+    function ketikTeks(kalimat, selesaiCallback) {
+      sedangKetik = true;
+      petunjukKetuk.style.visibility = 'hidden';
+      teksSurat.textContent = '';
+
+      const huruf = Array.from(kalimat);
+      let i = 0;
+
+      const interval = setInterval(() => {
+        teksSurat.textContent += huruf[i];
+        i++;
+        if (i >= huruf.length) {
+          clearInterval(interval);
+          sedangKetik = false;
+          if (selesaiCallback) selesaiCallback();
+        }
+      }, 32);
+    }
+
+    function tampilkanSlide(index) {
+      const data = daftarPesan[index];
+      ikonHati.textContent = data.ikon;
+
+      ketikTeks(data.teks, () => {
+        if (index < daftarPesan.length - 1) {
+          petunjukKetuk.style.visibility = 'visible';
+        } else {
+          petunjukKetuk.style.display = 'none';
+          wadahPilihan.classList.add('muncul');
+        }
+      });
+    }
+
+    // 1. Klik Amplop Pembuka
+    document.getElementById('amplopBox').addEventListener('click', () => {
+      if (amplopTerbuka) return;
+      amplopTerbuka = true;
+
+      const musik = document.getElementById('musik-latar');
+      if (musik && musik.paused) {
+        musik.play().catch(() => {});
+      }
+
+      mainkanNada(523.25, 0.25, 'triangle', 0.16);
+      if (navigator.vibrate) navigator.vibrate([40, 30, 40]);
+
+      document.getElementById('layarAmplop').classList.add('sembunyi');
+      document.getElementById('layarHati').classList.add('tampil');
+
+      setTimeout(() => {
+        tampilkanSlide(0);
+      }, 450);
+    });
+
+    // 2. Klik Hati untuk Lanjut Kalimat
+    wadahHati.addEventListener('click', (e) => {
+      if (e.target.closest('button')) return;
+      if (!amplopTerbuka || sedangKetik || sudahMemilih) return;
+
+      if (indeksPesan < daftarPesan.length - 1) {
+        indeksPesan++;
+        mainkanNada(440 + indeksPesan * 40, 0.12, 'sine', 0.1);
+        if (navigator.vibrate) navigator.vibrate(25);
+        tampilkanSlide(indeksPesan);
+      }
+    });
+
+    // 3A. PILIHAN: DITERIMA -> HATI BERSINAR -> HITUNG MUNDUR INDAH -> KEJUTAN MEWAH
+    document.getElementById('btnTerima').addEventListener('click', (e) => {
+      e.stopPropagation();
+      sudahMemilih = true;
+
+      document.body.classList.remove('mode-padam');
+      wadahHati.classList.remove('berdetak', 'retak');
+      wadahHati.classList.add('bersinar');
+      wadahPilihan.classList.remove('muncul');
+
+      suaraTerima();
+      tembakPartikel(130, 'bahagia');
+      if (navigator.vibrate) navigator.vibrate([60, 40, 60, 40, 100]);
+
+      let hitung = 3;
+      ikonHati.textContent = "🥰✨";
+      teksSurat.innerHTML = `Yeay! Hatiku bersinar bahagia! 💖<br>Kejutan spesial dalam:<div class="angka-mundur-indah" id="angkaIndah">${hitung}</div>`;
+
+      const timerMewah = setInterval(() => {
+        hitung--;
+        const angkaEl = document.getElementById('angkaIndah');
+
+        if (hitung > 0) {
+          if (angkaEl) angkaEl.textContent = hitung;
+          mainkanNada(659.25 + (3 - hitung) * 180, 0.28, 'sine', 0.15);
+          tembakPartikel(45, 'mewah');
+          if (navigator.vibrate) navigator.vibrate(40);
+        } else {
+          clearInterval(timerMewah);
+          aktifkanKejutanMewah();
+        }
+      }, 950);
+    });
+
+    function aktifkanKejutanMewah() {
+      // Kilatan cahaya hangat & musik fanfare megah
+      const kilatan = document.getElementById('kilatanLedakan');
+      kilatan.style.background = '#fffbeb';
+      kilatan.classList.add('aktif');
+      setTimeout(() => kilatan.classList.remove('aktif'), 120);
+
+      suaraGalaMewah();
+      if (navigator.vibrate) navigator.vibrate([80, 40, 80, 40, 150]);
+
+      // Ubah seluruh layar ke tema mewah
+      document.body.classList.add('mode-mewah');
+      wadahHati.classList.add('mekar-mewah');
+
+      // Isi tanggal hari ini secara otomatis di sertifikat cinta
+      const opsiTanggal = { day: 'numeric', month: 'long', year: 'numeric' };
+      const tglStr = new Date().toLocaleDateString('id-ID', opsiTanggal);
+      document.getElementById('tanggalJadian').textContent = `💍 Resmi Jadian • ${tglStr}`;
+
+      setTimeout(() => {
+        document.getElementById('layarHati').style.display = 'none';
+        document.getElementById('layarMewah').classList.add('tampil');
+      }, 350);
+
+      // Tembakkan kembang api emas & hati dari berbagai titik layar
+      tembakPartikel(160, 'mewah', window.innerWidth * 0.5, window.innerHeight * 0.45);
+      setTimeout(() => tembakPartikel(100, 'mewah', window.innerWidth * 0.25, window.innerHeight * 0.35), 350);
+      setTimeout(() => tembakPartikel(100, 'mewah', window.innerWidth * 0.75, window.innerHeight * 0.35), 650);
+
+      // Hujan kelopak mawar, mahkota, & kilau emas terus menerus
+      const ikonMewah = ['🌹', '💖', '✨', '🌸', '🥂', '💎', '🦋', '❤️'];
+      setInterval(() => {
+        const item = document.createElement('div');
+        item.className = 'dekorasi-melayang';
+        item.textContent = ikonMewah[Math.floor(Math.random() * ikonMewah.length)];
+        item.style.left = (Math.random() * 94 + 2) + 'vw';
+        const durasi = Math.random() * 3.5 + 4;
+        item.style.animationDuration = durasi + 's';
+        document.body.appendChild(item);
+        setTimeout(() => item.remove(), durasi * 1000);
+      }, 320);
+
+      // Kembang api otomatis berkala di latar belakang
+      setInterval(() => {
+        const rx = Math.random() * window.innerWidth * 0.8 + window.innerWidth * 0.1;
+        const ry = Math.random() * window.innerHeight * 0.5 + window.innerHeight * 0.15;
+        tembakPartikel(65, 'mewah', rx, ry);
+      }, 2400);
+    }
+
+    document.getElementById('btnKembangApiMewah').addEventListener('click', (e) => {
+      e.stopPropagation();
+      suaraGalaMewah();
+      tembakPartikel(140, 'mewah', e.clientX || window.innerWidth / 2, e.clientY || window.innerHeight / 2);
+      if (navigator.vibrate) navigator.vibrate([50, 30, 70]);
+    });
+
+    // 3B. PILIHAN: DITOLAK (HATI PADAM, RETAK, HITUNG MUNDUR & MELEDAK)
+    document.getElementById('btnTolak').addEventListener('click', (e) => {
+      e.stopPropagation();
+      sudahMemilih = true;
+
+      document.body.classList.add('mode-padam');
+      wadahHati.classList.remove('berdetak', 'bersinar');
+      wadahHati.classList.add('retak');
+      wadahPilihan.classList.remove('muncul');
+
+      suaraRetak();
+      if (navigator.vibrate) navigator.vibrate([120, 80, 180]);
+
+      let sisaWaktu = 3;
+      ikonHati.textContent = "💔💣";
+      teksSurat.innerHTML = `Yah... hatiku padam dan retak.<br>Menghancurkan diri dalam:<div class="angka-mundur" id="angkaMundur">${sisaWaktu}</div>`;
+
+      setTimeout(() => {
+        wadahHati.classList.add('kritis');
+      }, 600);
+
+      const timerLedakan = setInterval(() => {
+        sisaWaktu--;
+        const angkaEl = document.getElementById('angkaMundur');
+
+        if (sisaWaktu > 0) {
+          if (angkaEl) angkaEl.textContent = sisaWaktu;
+          mainkanNada(320 + (3 - sisaWaktu) * 120, 0.15, 'square', 0.15);
+          if (navigator.vibrate) navigator.vibrate(70);
+        } else {
+          clearInterval(timerLedakan);
+          ledakkanHati();
+        }
+      }, 950);
+    });
+
+    function ledakkanHati() {
+      const musik = document.getElementById('musik-latar');
+      if (musik && !musik.paused) {
+        musik.pause();
+      }
+
+      const kilatan = document.getElementById('kilatanLedakan');
+      kilatan.style.background = '#ffffff';
+      kilatan.classList.add('aktif');
+      setTimeout(() => kilatan.classList.remove('aktif'), 80);
+
+      suaraLedakan();
+      tembakPartikel(160, 'ledakan');
+      if (navigator.vibrate) navigator.vibrate([250, 60, 350]);
+
+      wadahHati.classList.remove('kritis');
+      wadahHati.classList.add('meledak');
+
+      setTimeout(() => {
+        document.getElementById('pesanAkhirLedakan').classList.add('tampil');
+      }, 500);
+    }
+
+    // Efek Kursor Desktop
+    const kursorMouse = document.getElementById('kursor-mouse');
+    if (window.matchMedia("(pointer: fine)").matches && kursorMouse) {
+      document.addEventListener('mousemove', (e) => {
+        kursorMouse.style.left = e.clientX + 'px';
+        kursorMouse.style.top = e.clientY + 'px';
+      });
+    }
+  </script>
+</body>
+</html>
